@@ -1,7 +1,6 @@
 import itertools
 
 import matplotlib.pyplot as plt
-from numpy.random import shuffle
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -9,7 +8,12 @@ from tqdm.auto import trange
 from typing import Iterator
 
 from boltzmann_experimentation.dataset import DatasetFactory
-from logger import general_logger, metrics_logger, add_file_logger
+from boltzmann_experimentation.logger import init_wandb_run
+from boltzmann_experimentation.logger import (
+    general_logger,
+    metrics_logger,
+    add_file_logger,
+)
 from boltzmann_experimentation.loss import (
     ExactLoss,
 )
@@ -50,18 +54,6 @@ val_loader = DataLoader(
 )
 
 
-def init_wandb_run(run_name: str) -> None:
-    wandb.init(
-        project="chakana",
-        name=run_name,
-        group=str(start_ts),
-        config={
-            "model_type": model_type,
-            "batch_size": general_settings.batch_size,
-        },
-    )
-
-
 def train_baselines(
     infinite_train_loader: Iterator[tuple[torch.Tensor, torch.Tensor]],
 ) -> None:
@@ -70,7 +62,7 @@ def train_baselines(
         run_name = (
             f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
         )
-        init_wandb_run(run_name)
+        init_wandb_run(run_name=run_name, model_type=model_type)
         if same_model_init:
             torch.manual_seed(SEED)
         model = ModelFactory.create_model(model_type)
@@ -96,7 +88,7 @@ for same_model_init in tqdm([True, False]):
         # Set up logging of metrics
         wandb.finish()
         run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
-        init_wandb_run(run_name)
+        init_wandb_run(run_name=run_name, model_type=model_type)
         log_dir = (
             general_settings.results_dir
             / f"{start_ts}/logs/{same_model_init}:{compression_factor}"
