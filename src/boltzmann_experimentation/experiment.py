@@ -1,31 +1,33 @@
 import itertools
+from typing import Iterator
 
+import cyclopts
 import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from tqdm.auto import trange
-from typing import Iterator
 
+import wandb
 from boltzmann_experimentation.dataset import DatasetFactory
-from boltzmann_experimentation.logger import init_wandb_run
+from boltzmann_experimentation.literals import GPU_NUMBER
 from boltzmann_experimentation.logger import (
-    general_logger,
-    metrics_logger,
     add_file_logger,
+    general_logger,
+    init_wandb_run,
+    metrics_logger,
 )
 from boltzmann_experimentation.loss import (
     ExactLoss,
 )
-import wandb
 from boltzmann_experimentation.miner import Miner
 from boltzmann_experimentation.model import MODEL_TYPE, ModelFactory
-from boltzmann_experimentation.settings import general_settings, start_ts, device
+from boltzmann_experimentation.settings import general_settings as g
+from boltzmann_experimentation.settings import start_ts
 from boltzmann_experimentation.validator import Validator
 from boltzmann_experimentation.viz import (
     InteractivePlotter,
 )
-import cyclopts
 
 app = cyclopts.App()
 
@@ -36,18 +38,19 @@ def run(
     num_miners: int = 5,
     num_communication_rounds: int = 3000,
     batch_size: int = 128,
+    gpu_number: GPU_NUMBER | None = None,
 ):
-    general_settings.num_miners = (
-        num_miners if num_miners else general_settings.num_miners
-    )
-    general_settings.num_communication_rounds = (
+    # change the device to f"cuda:{gpu_number}"
+    g.num_miners = num_miners if num_miners else g.num_miners
+    g.num_communication_rounds = (
         num_communication_rounds
         if num_communication_rounds
-        else general_settings.num_communication_rounds
+        else g.num_communication_rounds
     )
-    general_settings.batch_size = (
-        batch_size if batch_size else general_settings.batch_size
-    )
+    g.batch_size = batch_size if batch_size else g.batch_size
+    g.set_device(gpu_number)
+
+    general_logger.info(f"Starting experiment on device {g.device}")
 
     PLOT_INTERACTIVELY = False
     SEED = 42
@@ -61,14 +64,14 @@ def run(
     # Create DataLoader for training and validation sets
     train_loader = DataLoader(
         train_dataset,
-        batch_size=general_settings.batch_size,
-        num_workers=general_settings.num_workers_dataloader,
+        batch_size=g.batch_size,
+        num_workers=g.num_workers_dataloader,
         shuffle=True,
     )
     val_loader = DataLoader(
         val_dataset,
-        batch_size=general_settings.batch_size,
-        num_workers=general_settings.num_workers_dataloader,
+        batch_size=g.batch_size,
+        num_workers=g.num_workers_dataloader,
         shuffle=False,
     )
 
@@ -85,9 +88,9 @@ def run(
                 torch.manual_seed(SEED)
             model = ModelFactory.create_model(model_type)
             model.validate(val_loader)
-            for _ in trange(general_settings.num_communication_rounds):
+            for _ in trange(g.num_communication_rounds):
                 features, targets = next(infinite_train_loader)
-                data = features.to(device), targets.to(device)
+                data = features.to(g.device), targets.to(g.device)
                 model.train_step(data)
                 model.validate(val_loader)
 
@@ -107,7 +110,7 @@ def run(
             run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
             init_wandb_run(run_name=run_name, model_type=model_type)
             log_dir = (
-                general_settings.results_dir
+                g.results_dir
                 / f"{start_ts}/logs/{same_model_init}:{compression_factor}"
             )
             if metrics_logger_id is not None:
@@ -117,10 +120,10 @@ def run(
             general_logger.info(
                 f"Running experiment with compression factor {compression_factor}"
             )
-            general_settings.compression_factor = compression_factor
+            g.compression_factor = compression_factor
             # Create torch models
             miner_models = []
-            for _ in range(general_settings.num_miners):
+            for _ in range(g.num_miners):
                 if same_model_init:
                     torch.manual_seed(SEED)
                 miner_models.append(ModelFactory.create_model(model_type))
@@ -149,7 +152,7 @@ def run(
             # Create validator
             validator = Validator(
                 validator_model,
-                general_settings.compression_factor,
+                g.compression_factor,
                 loss_method,
             )
             general_logger.success("Created validator")
@@ -171,11 +174,11 @@ def run(
             validator.model.validate(val_loader)
 
             # Training loop
-            for round_num in trange(general_settings.num_communication_rounds):
+            for round_num in trange(g.num_communication_rounds):
                 validator.reset_slices_and_indices()
                 for miner in miners:
                     features, targets = next(infinite_train_loader)
-                    miner.data = features.to(device), targets.to(device)
+                    miner.data = features.to(g.device), targets.to(g.device)
                     miner.model.train_step(miner.data)
                     slice = miner.get_slice_from_indices(validator.slice_indices)
                     validator.add_miner_slice(slice)

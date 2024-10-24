@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 
 import wandb
 from boltzmann_experimentation.logger import general_logger, metrics_logger
-from boltzmann_experimentation.settings import device, tiny_nn_settings
+from boltzmann_experimentation.settings import tiny_nn_settings, general_settings as g
 
 
 class MinerSlice(BaseModel):
@@ -156,7 +156,7 @@ class Model:
         criterion: nn.modules.loss._Loss,
         loss_transformation: Callable | None = None,
     ):
-        self.torch_model = torch_model.to(device)
+        self.torch_model = torch_model.to(g.device)
         self.optimizer = optimizer
         self.criterion = criterion
         self.loss_transformation = loss_transformation
@@ -205,7 +205,7 @@ class Model:
 
         # Loop through all validation batches
         for features, targets in val_loader:
-            val_batch = (features.to(device), targets.to(device))
+            val_batch = (features.to(g.device), targets.to(g.device))
             loss, correct, total = self.val_step(val_batch)
             total_loss += loss * total  # Accumulate weighted loss
             total_correct += correct  # Accumulate correct predictions
