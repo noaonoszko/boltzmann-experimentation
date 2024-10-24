@@ -26,6 +26,7 @@ def add_file_logger(log_dir: Path) -> None:
         level="INFO",
         rotation="10 MB",
         compression="zip",
+        retention="5 files",
         filter=lambda record: record["extra"].get("name") == "metrics",
     )
 
