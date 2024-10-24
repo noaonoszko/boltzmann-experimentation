@@ -2,9 +2,7 @@ from pydantic_settings import BaseSettings
 from datetime import datetime
 from pathlib import Path
 import torch
-
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from boltzmann_experimentation.literals import GPU_NUMBER
 
 
 class TinyNNSettings(BaseSettings):
@@ -21,7 +19,7 @@ class GeneralSettings(BaseSettings):
 
     # Data
     batch_size: int = -1
-    num_workers_dataloader: int = 4 if device == "cuda" else 0
+    num_workers_dataloader: int = 4  # This will change based on the device
 
     # Synthetic data
     data_size: int = 10000
@@ -29,6 +27,22 @@ class GeneralSettings(BaseSettings):
 
     # Results
     results_dir: Path = Path(__file__).parents[2] / "results"
+
+    # Device
+    device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    def set_device(self, gpu_number: GPU_NUMBER | None = None):
+        t = torch.cuda.is_available()
+        self.device = torch.device(
+            f"cuda:{gpu_number}"
+            if t and gpu_number is not None
+            else "cuda"
+            if t
+            else "cpu"
+        )
+
+        # Update other settings depending on the device
+        self.num_workers_dataloader = 4 if self.device.type == "cuda" else 0
 
 
 tiny_nn_settings = TinyNNSettings()
