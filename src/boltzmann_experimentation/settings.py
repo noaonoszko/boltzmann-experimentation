@@ -15,12 +15,12 @@ class TinyNNSettings(BaseSettings):
 
 class GeneralSettings(BaseSettings):
     # Distributed learning
-    num_miners: int = 5
-    num_communication_rounds: int = 3000
+    num_miners: int = -1
+    num_communication_rounds: int = -1
     compression_factor: int = 100
 
     # Data
-    batch_size: int = 128
+    batch_size: int = -1
     num_workers_dataloader: int = 4 if device == "cuda" else 0
 
     # Synthetic data
