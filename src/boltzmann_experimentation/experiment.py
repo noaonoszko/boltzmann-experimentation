@@ -10,7 +10,7 @@ from tqdm.auto import trange
 
 import wandb
 from boltzmann_experimentation.dataset import DatasetFactory
-from boltzmann_experimentation.literals import GPU_NUMBER
+from boltzmann_experimentation.literals import GPU_NUMBER, ONLY_TRAIN
 from boltzmann_experimentation.logger import (
     add_file_logger,
     general_logger,
@@ -39,6 +39,7 @@ def run(
     num_communication_rounds: int = 3000,
     batch_size: int = 128,
     gpu_number: GPU_NUMBER | None = None,
+    only_train: ONLY_TRAIN | None = None,
 ):
     # change the device to f"cuda:{gpu_number}"
     g.num_miners = num_miners if num_miners else g.num_miners
@@ -99,8 +100,13 @@ def run(
     validator_val_losses_compression_factor = {}
 
     # Train baselines
-    train_baselines(infinite_train_loader)
-    general_logger.success("Trained baselines")
+    if only_train in (None, "baselines"):
+        train_baselines(infinite_train_loader)
+        general_logger.success("Trained baselines")
+    if only_train == "baselines":
+        return
+    else:
+        general_logger.info("Training only miners")
 
     metrics_logger_id = None
     for same_model_init in tqdm([True, False]):
