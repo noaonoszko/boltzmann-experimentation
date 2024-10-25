@@ -1,3 +1,4 @@
+from torch.optim.lr_scheduler import MultiStepLR, LRScheduler
 import json
 from copy import deepcopy
 from datetime import datetime
@@ -36,6 +37,7 @@ MODEL_TYPE = Literal[
 class ModelFactory:
     @staticmethod
     def create_model(model_type: MODEL_TYPE):
+        lr_scheduler = None
         loss_transformation = None
         match model_type:
             case "deit-b":
@@ -48,14 +50,24 @@ class ModelFactory:
                 criterion = torch.nn.CrossEntropyLoss()
                 optimizer = torch.optim.Adam(torch_model.parameters(), lr=1e-4)
             case "densenet":
-                torch_model = models.densenet121(pretrained=False)
-                torch_model.classifier = torch.nn.Linear(
-                    torch_model.classifier.in_features, 10
-                )
+                torch_model = models.DenseNet(growth_rate=24, num_classes=10)
                 criterion = nn.CrossEntropyLoss()
-                optimizer = optim.Adam(
-                    torch_model.parameters(), lr=0.001, weight_decay=1e-4
+                optimizer = optim.SGD(
+                    torch_model.parameters(),
+                    lr=0.1,
+                    momentum=0.9,
+                    weight_decay=1e-4,
+                    nesterov=True,
                 )
+                lr_scheduler = MultiStepLR(
+                    optimizer,
+                    milestones=(
+                        int(0.5 * g.num_communication_rounds),
+                        int(0.75 * g.num_communication_rounds),
+                    ),
+                    gamma=0.1,
+                )
+                g.batch_size = 64
             case "resnet18":
                 torch_model = models.resnet18()
                 torch_model.fc = torch.nn.Linear(torch_model.fc.in_features, 10)
@@ -100,6 +112,7 @@ class ModelFactory:
             torch_model,
             optimizer,
             criterion,
+            lr_scheduler=lr_scheduler,
             loss_transformation=loss_transformation,
         )
 
@@ -154,11 +167,13 @@ class Model:
         torch_model: nn.Module,
         optimizer: optim.Optimizer,
         criterion: nn.modules.loss._Loss,
+        lr_scheduler: LRScheduler | None = None,
         loss_transformation: Callable | None = None,
     ):
         self.torch_model = torch_model.to(g.device)
         self.optimizer = optimizer
         self.criterion = criterion
+        self.lr_scheduler = lr_scheduler
         self.loss_transformation = loss_transformation
         self.val_losses = torch.tensor([])
         self.metrics = {

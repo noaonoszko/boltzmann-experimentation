@@ -210,6 +210,8 @@ def run(
                     miner.model.update_with_slice(
                         validator_slice, validator.slice_indices
                     )
+                    if miner.model.lr_scheduler is not None:
+                        miner.model.lr_scheduler.step()
 
                 if PLOT_INTERACTIVELY and interactive_plotter is not None:
                     interactive_plotter.plot_data_and_model(
