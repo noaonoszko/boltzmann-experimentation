@@ -1,3 +1,4 @@
+from torch.optim.lr_scheduler import MultiStepLR, LRScheduler
 import json
 from copy import deepcopy
 from datetime import datetime
@@ -36,6 +37,7 @@ MODEL_TYPE = Literal[
 class ModelFactory:
     @staticmethod
     def create_model(model_type: MODEL_TYPE):
+        lr_scheduler = None
         loss_transformation = None
         match model_type:
             case "deit-b":
@@ -59,6 +61,14 @@ class ModelFactory:
                     momentum=0.9,
                     weight_decay=1e-4,
                     nesterov=True,
+                )
+                lr_scheduler = MultiStepLR(
+                    optimizer,
+                    milestones=(
+                        int(0.5 * g.num_communication_rounds),
+                        int(0.75 * g.num_communication_rounds),
+                    ),
+                    gamma=0.1,
                 )
             case "resnet18":
                 torch_model = models.resnet18()
@@ -104,6 +114,7 @@ class ModelFactory:
             torch_model,
             optimizer,
             criterion,
+            lr_scheduler=lr_scheduler,
             loss_transformation=loss_transformation,
         )
 
@@ -158,11 +169,13 @@ class Model:
         torch_model: nn.Module,
         optimizer: optim.Optimizer,
         criterion: nn.modules.loss._Loss,
+        lr_scheduler: LRScheduler | None = None,
         loss_transformation: Callable | None = None,
     ):
         self.torch_model = torch_model.to(g.device)
         self.optimizer = optimizer
         self.criterion = criterion
+        self.lr_scheduler = lr_scheduler
         self.loss_transformation = loss_transformation
         self.val_losses = torch.tensor([])
         self.metrics = {
