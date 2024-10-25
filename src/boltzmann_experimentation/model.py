@@ -70,6 +70,7 @@ class ModelFactory:
                     ),
                     gamma=0.1,
                 )
+                g.batch_size = 64
             case "resnet18":
                 torch_model = models.resnet18()
                 torch_model.fc = torch.nn.Linear(torch_model.fc.in_features, 10)
