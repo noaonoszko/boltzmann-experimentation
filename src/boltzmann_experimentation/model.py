@@ -53,8 +53,12 @@ class ModelFactory:
                     torch_model.classifier.in_features, 10
                 )
                 criterion = nn.CrossEntropyLoss()
-                optimizer = optim.Adam(
-                    torch_model.parameters(), lr=0.001, weight_decay=1e-4
+                optimizer = optim.SGD(
+                    torch_model.parameters(),
+                    lr=0.1,
+                    momentum=0.9,
+                    weight_decay=1e-4,
+                    nesterov=True,
                 )
             case "resnet18":
                 torch_model = models.resnet18()
