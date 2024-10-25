@@ -50,10 +50,7 @@ class ModelFactory:
                 criterion = torch.nn.CrossEntropyLoss()
                 optimizer = torch.optim.Adam(torch_model.parameters(), lr=1e-4)
             case "densenet":
-                torch_model = models.densenet121(pretrained=False)
-                torch_model.classifier = torch.nn.Linear(
-                    torch_model.classifier.in_features, 10
-                )
+                torch_model = models.DenseNet(growth_rate=24, num_classes=10)
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.SGD(
                     torch_model.parameters(),
