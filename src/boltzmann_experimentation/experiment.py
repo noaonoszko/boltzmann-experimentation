@@ -82,13 +82,13 @@ def run(
         infinite_train_loader: Iterator[tuple[torch.Tensor, torch.Tensor]],
     ) -> None:
         for same_model_init in tqdm([True, False]):
+            if same_model_init:
+                torch.manual_seed(SEED)
+            model = ModelFactory.create_model(model_type)
             if log_to_wandb:
                 wandb.finish()
                 run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
                 init_wandb_run(run_name=run_name, model_type=model_type)
-            if same_model_init:
-                torch.manual_seed(SEED)
-            model = ModelFactory.create_model(model_type)
             model.validate(val_loader)
             for _ in trange(g.num_communication_rounds):
                 features, targets = next(infinite_train_loader)
@@ -112,11 +112,6 @@ def run(
     metrics_logger_id = None
     for same_model_init in tqdm([True, False]):
         for compression_idx, compression_factor in enumerate(tqdm([1, 10, 100, 1000])):
-            if log_to_wandb:
-                # Set up logging of metrics
-                wandb.finish()
-                run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
-                init_wandb_run(run_name=run_name, model_type=model_type)
             log_dir = (
                 g.results_dir
                 / f"{start_ts}/logs/{same_model_init}:{compression_factor}"
@@ -177,6 +172,11 @@ def run(
                     val_dataset.targets.max().item() + 2,
                 )
                 interactive_plotter = InteractivePlotter(xlim, ylim)
+
+            if log_to_wandb:
+                wandb.finish()
+                run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
+                init_wandb_run(run_name=run_name, model_type=model_type)
 
             # Validate the initial model
             validator.model.validate(val_loader)
