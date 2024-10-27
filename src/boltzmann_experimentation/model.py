@@ -30,7 +30,7 @@ class MinerSlice(BaseModel):
 
 
 MODEL_TYPE = Literal[
-    "two_neuron_network", "tiny_nn", "cifar10_cnn", "resnet18", "densenet", "deit-b"
+    "two_neuron_network", "tiny_nn", "simple-cnn", "resnet18", "densenet", "deit-b"
 ]
 
 
@@ -75,8 +75,8 @@ class ModelFactory:
                 optimizer = optim.Adam(
                     torch_model.parameters(), lr=0.001, weight_decay=1e-4
                 )
-            case "cifar10_cnn":
-                torch_model = CIFAR10CNN()
+            case "simple-cnn":
+                torch_model = SimpleCNN()
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.Adam(torch_model.parameters(), lr=0.001)
             case "two_neuron_network":
@@ -117,9 +117,9 @@ class ModelFactory:
         )
 
 
-class CIFAR10CNN(nn.Module):
+class SimpleCNN(nn.Module):
     def __init__(self):
-        super(CIFAR10CNN, self).__init__()
+        super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(64 * 8 * 8, 512)

@@ -11,7 +11,7 @@ class DatasetFactory:
     @staticmethod
     def create_dataset(model_type: MODEL_TYPE) -> tuple[Dataset, Dataset]:
         match model_type:
-            case "cifar10_cnn" | "resnet18" | "densenet" | "deit-b":
+            case "simple-cnn" | "resnet18" | "densenet" | "deit-b":
                 # Define data transformation (e.g., normalization)
                 if model_type == "deit-b":
                     transform = create_transform(
