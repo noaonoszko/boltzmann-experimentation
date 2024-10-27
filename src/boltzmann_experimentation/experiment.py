@@ -41,6 +41,8 @@ def run(
     gpu: GPU | None = None,
     only_train: ONLY_TRAIN | None = None,
     log_to_wandb: bool = True,
+    same_model_init: bool | None = None,
+    compression_factors: list[int] = [1, 10, 100, 1000],
 ):
     # Change pydantic settings
     g.num_miners = num_miners if num_miners else g.num_miners
@@ -52,8 +54,13 @@ def run(
     g.batch_size = batch_size if batch_size else g.batch_size
     g.set_device(gpu)
     g.log_to_wandb = log_to_wandb
+    same_model_init_values = (
+        [True, False] if same_model_init is None else [same_model_init]
+    )
 
-    general_logger.info(f"Starting experiment on device {g.device}")
+    general_logger.info(
+        f"Starting experiment on device {g.device} with {same_model_init_values=} and {compression_factors=}"
+    )
 
     PLOT_INTERACTIVELY = False
     SEED = 42
@@ -81,7 +88,7 @@ def run(
     def train_baselines(
         infinite_train_loader: Iterator[tuple[torch.Tensor, torch.Tensor]],
     ) -> None:
-        for same_model_init in tqdm([True, False]):
+        for same_model_init in tqdm(same_model_init_values):
             if same_model_init:
                 torch.manual_seed(SEED)
             model = ModelFactory.create_model(model_type)
@@ -111,8 +118,8 @@ def run(
         general_logger.info("Training only miners")
 
     metrics_logger_id = None
-    for same_model_init in tqdm([True, False]):
-        for compression_idx, compression_factor in enumerate(tqdm([1, 10, 100, 1000])):
+    for same_model_init in tqdm(same_model_init_values):
+        for compression_idx, compression_factor in enumerate(tqdm(compression_factors)):
             log_dir = (
                 g.results_dir
                 / f"{start_ts}/logs/{same_model_init}:{compression_factor}"
