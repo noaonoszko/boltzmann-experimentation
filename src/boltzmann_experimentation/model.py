@@ -14,7 +14,10 @@ from torch.utils.data import DataLoader
 
 import wandb
 from boltzmann_experimentation.logger import general_logger, metrics_logger
-from boltzmann_experimentation.settings import tiny_nn_settings, general_settings as g
+from boltzmann_experimentation.settings import (
+    perceptron_settings,
+    general_settings as g,
+)
 
 
 class MinerSlice(BaseModel):
@@ -31,7 +34,7 @@ class MinerSlice(BaseModel):
 
 MODEL_TYPE = Literal[
     "single-neuron-perceptron",
-    "tiny_nn",
+    "two-layer-perceptron",
     "simple-cnn",
     "resnet18",
     "densenet",
@@ -93,11 +96,11 @@ class ModelFactory:
                     optimizer,
                     criterion,
                 )
-            case "tiny_nn":
-                torch_model = TinyNeuralNetwork(
-                    tiny_nn_settings.input_size,
-                    tiny_nn_settings.hidden_size,
-                    tiny_nn_settings.output_size,
+            case "two-layer-perceptron":
+                torch_model = TwoLayerPerceptron(
+                    perceptron_settings.input_size,
+                    perceptron_settings.hidden_size,
+                    perceptron_settings.output_size,
                 )
                 optimizer = optim.AdamW(torch_model.parameters(), lr=0.01)
                 criterion = nn.MSELoss()  # Mean squared error for regression
@@ -143,9 +146,9 @@ class SimpleCNN(nn.Module):
         return x
 
 
-class TinyNeuralNetwork(nn.Module):
+class TwoLayerPerceptron(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
-        super(TinyNeuralNetwork, self).__init__()
+        super(TwoLayerPerceptron, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, output_size)
         self.dropout = nn.Dropout(p=0.0)

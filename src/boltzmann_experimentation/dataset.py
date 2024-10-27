@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 
 from boltzmann_experimentation.model import MODEL_TYPE
-from boltzmann_experimentation.settings import general_settings, tiny_nn_settings
+from boltzmann_experimentation.settings import general_settings, perceptron_settings
 from timm.data import create_transform
 
 
@@ -41,9 +41,9 @@ class DatasetFactory:
                     root="./data", train=False, download=True, transform=transform
                 )
                 return train_dataset, val_dataset
-            case "tiny_nn" | "single-neuron-perceptron":
+            case "two-layer-perceptron" | "single-neuron-perceptron":
                 dataset = LinearRegressionDataset(
-                    general_settings.data_size, tiny_nn_settings.input_size
+                    general_settings.data_size, perceptron_settings.input_size
                 )
                 # Split dataset into training and validation sets
                 train_size = int(
