@@ -30,7 +30,12 @@ class MinerSlice(BaseModel):
 
 
 MODEL_TYPE = Literal[
-    "two_neuron_network", "tiny_nn", "simple-cnn", "resnet18", "densenet", "deit-b"
+    "single-neuron-perceptron",
+    "tiny_nn",
+    "simple-cnn",
+    "resnet18",
+    "densenet",
+    "deit-b",
 ]
 
 
@@ -79,8 +84,8 @@ class ModelFactory:
                 torch_model = SimpleCNN()
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.Adam(torch_model.parameters(), lr=0.001)
-            case "two_neuron_network":
-                torch_model = OneNeuronNetwork()
+            case "single-neuron-perceptron":
+                torch_model = SingleNeuronPerceptron()
                 criterion = nn.MSELoss()
                 optimizer = optim.SGD(torch_model.parameters(), lr=0.01)
                 return Model(
@@ -152,9 +157,9 @@ class TinyNeuralNetwork(nn.Module):
         return self.fc2(x)
 
 
-class OneNeuronNetwork(nn.Module):
+class SingleNeuronPerceptron(nn.Module):
     def __init__(self):
-        super(OneNeuronNetwork, self).__init__()
+        super(SingleNeuronPerceptron, self).__init__()
         self.linear = nn.Linear(1, 1)  # One input and one output
 
     def forward(self, x):

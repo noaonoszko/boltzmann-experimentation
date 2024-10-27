@@ -41,7 +41,7 @@ class DatasetFactory:
                     root="./data", train=False, download=True, transform=transform
                 )
                 return train_dataset, val_dataset
-            case "tiny_nn" | "two_neuron_network":
+            case "tiny_nn" | "single-neuron-perceptron":
                 dataset = LinearRegressionDataset(
                     general_settings.data_size, tiny_nn_settings.input_size
                 )
