@@ -5,7 +5,7 @@ import torch
 from boltzmann_experimentation.literals import GPU_NUMBER
 
 
-class TinyNNSettings(BaseSettings):
+class PerceptronSettings(BaseSettings):
     hidden_size: int = 10000
     output_size: int = 1
     input_size: int = 1
@@ -48,6 +48,6 @@ class GeneralSettings(BaseSettings):
     log_to_wandb: bool = True
 
 
-tiny_nn_settings = TinyNNSettings()
+perceptron_settings = PerceptronSettings()
 general_settings = GeneralSettings()
 start_ts = datetime.now()

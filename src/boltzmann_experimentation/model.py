@@ -14,7 +14,10 @@ from torch.utils.data import DataLoader
 
 import wandb
 from boltzmann_experimentation.logger import general_logger, metrics_logger
-from boltzmann_experimentation.settings import tiny_nn_settings, general_settings as g
+from boltzmann_experimentation.settings import (
+    perceptron_settings,
+    general_settings as g,
+)
 
 
 class MinerSlice(BaseModel):
@@ -30,7 +33,12 @@ class MinerSlice(BaseModel):
 
 
 MODEL_TYPE = Literal[
-    "two_neuron_network", "tiny_nn", "cifar10_cnn", "resnet18", "densenet", "deit-b"
+    "single-neuron-perceptron",
+    "two-layer-perceptron",
+    "simple-cnn",
+    "resnet18",
+    "densenet",
+    "deit-b",
 ]
 
 
@@ -75,12 +83,12 @@ class ModelFactory:
                 optimizer = optim.Adam(
                     torch_model.parameters(), lr=0.001, weight_decay=1e-4
                 )
-            case "cifar10_cnn":
-                torch_model = CIFAR10CNN()
+            case "simple-cnn":
+                torch_model = SimpleCNN()
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.Adam(torch_model.parameters(), lr=0.001)
-            case "two_neuron_network":
-                torch_model = OneNeuronNetwork()
+            case "single-neuron-perceptron":
+                torch_model = SingleNeuronPerceptron()
                 criterion = nn.MSELoss()
                 optimizer = optim.SGD(torch_model.parameters(), lr=0.01)
                 return Model(
@@ -88,11 +96,11 @@ class ModelFactory:
                     optimizer,
                     criterion,
                 )
-            case "tiny_nn":
-                torch_model = TinyNeuralNetwork(
-                    tiny_nn_settings.input_size,
-                    tiny_nn_settings.hidden_size,
-                    tiny_nn_settings.output_size,
+            case "two-layer-perceptron":
+                torch_model = TwoLayerPerceptron(
+                    perceptron_settings.input_size,
+                    perceptron_settings.hidden_size,
+                    perceptron_settings.output_size,
                 )
                 optimizer = optim.AdamW(torch_model.parameters(), lr=0.01)
                 criterion = nn.MSELoss()  # Mean squared error for regression
@@ -117,9 +125,9 @@ class ModelFactory:
         )
 
 
-class CIFAR10CNN(nn.Module):
+class SimpleCNN(nn.Module):
     def __init__(self):
-        super(CIFAR10CNN, self).__init__()
+        super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(64 * 8 * 8, 512)
@@ -138,9 +146,9 @@ class CIFAR10CNN(nn.Module):
         return x
 
 
-class TinyNeuralNetwork(nn.Module):
+class TwoLayerPerceptron(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
-        super(TinyNeuralNetwork, self).__init__()
+        super(TwoLayerPerceptron, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, output_size)
         self.dropout = nn.Dropout(p=0.0)
@@ -152,9 +160,9 @@ class TinyNeuralNetwork(nn.Module):
         return self.fc2(x)
 
 
-class OneNeuronNetwork(nn.Module):
+class SingleNeuronPerceptron(nn.Module):
     def __init__(self):
-        super(OneNeuronNetwork, self).__init__()
+        super(SingleNeuronPerceptron, self).__init__()
         self.linear = nn.Linear(1, 1)  # One input and one output
 
     def forward(self, x):
