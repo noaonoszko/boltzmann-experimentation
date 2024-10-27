@@ -85,6 +85,7 @@ def run(
             if same_model_init:
                 torch.manual_seed(SEED)
             model = ModelFactory.create_model(model_type)
+            general_logger.info(f"Model has {model.num_params()/1e6:.0f}M params.")
             if log_to_wandb:
                 wandb.finish()
                 run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
