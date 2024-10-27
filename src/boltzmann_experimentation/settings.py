@@ -44,6 +44,9 @@ class GeneralSettings(BaseSettings):
         # Update other settings depending on the device
         self.num_workers_dataloader = 4 if self.device.type == "cuda" else 0
 
+    # Logging
+    log_to_wandb: bool = True
+
 
 tiny_nn_settings = TinyNNSettings()
 general_settings = GeneralSettings()

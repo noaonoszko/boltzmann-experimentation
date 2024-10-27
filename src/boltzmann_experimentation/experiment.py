@@ -40,8 +40,9 @@ def run(
     batch_size: int = 128,
     gpu_number: GPU_NUMBER | None = None,
     only_train: ONLY_TRAIN | None = None,
+    log_to_wandb: bool = True,
 ):
-    # change the device to f"cuda:{gpu_number}"
+    # Change pydantic settings
     g.num_miners = num_miners if num_miners else g.num_miners
     g.num_communication_rounds = (
         num_communication_rounds
@@ -50,6 +51,7 @@ def run(
     )
     g.batch_size = batch_size if batch_size else g.batch_size
     g.set_device(gpu_number)
+    g.log_to_wandb = log_to_wandb
 
     general_logger.info(f"Starting experiment on device {g.device}")
 
@@ -80,11 +82,10 @@ def run(
         infinite_train_loader: Iterator[tuple[torch.Tensor, torch.Tensor]],
     ) -> None:
         for same_model_init in tqdm([True, False]):
-            wandb.finish()
-            run_name = (
-                f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
-            )
-            init_wandb_run(run_name=run_name, model_type=model_type)
+            if log_to_wandb:
+                wandb.finish()
+                run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
+                init_wandb_run(run_name=run_name, model_type=model_type)
             if same_model_init:
                 torch.manual_seed(SEED)
             model = ModelFactory.create_model(model_type)
@@ -111,10 +112,11 @@ def run(
     metrics_logger_id = None
     for same_model_init in tqdm([True, False]):
         for compression_idx, compression_factor in enumerate(tqdm([1, 10, 100, 1000])):
-            # Set up logging of metrics
-            wandb.finish()
-            run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
-            init_wandb_run(run_name=run_name, model_type=model_type)
+            if log_to_wandb:
+                # Set up logging of metrics
+                wandb.finish()
+                run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
+                init_wandb_run(run_name=run_name, model_type=model_type)
             log_dir = (
                 g.results_dir
                 / f"{start_ts}/logs/{same_model_init}:{compression_factor}"

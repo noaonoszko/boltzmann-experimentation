@@ -230,10 +230,10 @@ class Model:
         avg_loss = total_loss / total_samples
         avg_accuracy = total_correct / total_samples
 
-        # Log metrics
-        self.add_metric_to_log("val_loss", avg_loss)
-        self.add_metric_to_log("val_acc", avg_accuracy)
-        self.commit_log()
+        if g.log_to_wandb:
+            self.add_metric_to_log("val_loss", avg_loss)
+            self.add_metric_to_log("val_acc", avg_accuracy)
+            self.commit_log()
         return avg_loss, avg_accuracy
 
     def log_metrics_to_file(self, metric_name: str, value: float) -> None:
