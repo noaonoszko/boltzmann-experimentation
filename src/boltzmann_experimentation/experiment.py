@@ -10,7 +10,7 @@ from tqdm.auto import trange
 
 import wandb
 from boltzmann_experimentation.dataset import DatasetFactory
-from boltzmann_experimentation.literals import GPU_NUMBER, ONLY_TRAIN
+from boltzmann_experimentation.literals import GPU, ONLY_TRAIN
 from boltzmann_experimentation.logger import (
     add_file_logger,
     general_logger,
@@ -38,7 +38,7 @@ def run(
     num_miners: int = 5,
     num_communication_rounds: int = 3000,
     batch_size: int = 128,
-    gpu_number: GPU_NUMBER | None = None,
+    gpu: GPU | None = None,
     only_train: ONLY_TRAIN | None = None,
     log_to_wandb: bool = True,
 ):
@@ -50,7 +50,7 @@ def run(
         else g.num_communication_rounds
     )
     g.batch_size = batch_size if batch_size else g.batch_size
-    g.set_device(gpu_number)
+    g.set_device(gpu)
     g.log_to_wandb = log_to_wandb
 
     general_logger.info(f"Starting experiment on device {g.device}")

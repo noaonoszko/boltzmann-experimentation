@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 from datetime import datetime
 from pathlib import Path
 import torch
-from boltzmann_experimentation.literals import GPU_NUMBER
+from boltzmann_experimentation.literals import GPU
 
 
 class PerceptronSettings(BaseSettings):
@@ -31,14 +31,10 @@ class GeneralSettings(BaseSettings):
     # Device
     device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def set_device(self, gpu_number: GPU_NUMBER | None = None):
+    def set_device(self, gpu: GPU | None = None):
         t = torch.cuda.is_available()
         self.device = torch.device(
-            f"cuda:{gpu_number}"
-            if t and gpu_number is not None
-            else "cuda"
-            if t
-            else "cpu"
+            f"cuda:{gpu}" if t and gpu is not None else "cuda" if t else "cpu"
         )
 
         # Update other settings depending on the device
