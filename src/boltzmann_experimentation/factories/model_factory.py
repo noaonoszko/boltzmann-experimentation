@@ -32,8 +32,17 @@ class ModelFactory:
                 criterion = torch.nn.CrossEntropyLoss()
                 optimizer = torch.optim.Adam(torch_model.parameters(), lr=1e-4)
             case "densenet":
+                depth = 100
+                growth_rate = 24
+                assert (depth - 4) % 3 == 0, "Depth must be of the form 3n + 4."
+                num_layers = (depth - 4) // 4
+
                 torch_model = torchvision.models.DenseNet(
-                    growth_rate=24, num_classes=10
+                    growth_rate=growth_rate,
+                    block_config=(num_layers, num_layers, num_layers, num_layers),
+                    num_init_features=growth_rate
+                    * 2,  # DenseNet-BC uses k*2 for initial features
+                    num_classes=10,
                 )
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.SGD(
