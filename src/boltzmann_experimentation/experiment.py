@@ -37,7 +37,8 @@ def run(
     model_type: MODEL_TYPE,
     num_miners: int = 5,
     num_communication_rounds: int = 3000,
-    batch_size: int = 128,
+    batch_size_train: int = 128,
+    batch_size_val: int = 512,
     gpu: GPU | None = None,
     only_train: ONLY_TRAIN | None = None,
     log_to_wandb: bool = True,
@@ -51,7 +52,8 @@ def run(
         if num_communication_rounds
         else g.num_communication_rounds
     )
-    g.batch_size = batch_size if batch_size else g.batch_size
+    g.batch_size_train = batch_size_train
+    g.batch_size_val = batch_size_val
     g.set_device(gpu)
     g.log_to_wandb = log_to_wandb
     same_model_init_values = (
