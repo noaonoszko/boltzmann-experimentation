@@ -1,0 +1,16 @@
+repos:
+- repo: local
+  hooks:
+    - id: ruff
+      name: Ruff Linter
+      entry: ruff check
+      args: [ "--fix", "--unsafe-fixes", "." ]
+      language: python
+      types: [python]
+
+    - id: ruff-format
+      name: Ruff Formatter
+      entry: ruff format
+      args: [ "." ]
+      language: python
+      types: [python]
