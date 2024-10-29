@@ -1,5 +1,3 @@
-from typing import Iterator
-
 import cyclopts
 import matplotlib.pyplot as plt
 import torch
@@ -78,9 +76,7 @@ def run(
     infinite_val_loader = infinite_data_loader_generator(val_dataset, train=False)
     validator_val_losses_compression_factor = {}
 
-    def train_baselines(
-        infinite_train_loader: Iterator[tuple[torch.Tensor, torch.Tensor]],
-    ) -> None:
+    def train_baselines() -> None:
         for same_model_init in tqdm(same_model_init_values):
             if same_model_init:
                 torch.manual_seed(SEED)
@@ -90,19 +86,17 @@ def run(
                 wandb.finish()
                 run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
                 init_wandb_run(run_name=run_name, model_type=model_type)
-            features, targets = next(infinite_val_loader)
-            val_batch = features.to(g.device), targets.to(g.device)
+            val_batch = next(infinite_val_loader)
             model.val_step(val_batch)
             for _ in trange(g.num_communication_rounds):
-                features, targets = next(infinite_train_loader)
-                batch = features.to(g.device), targets.to(g.device)
+                batch = next(infinite_train_loader)
                 model.train_step(batch)
                 val_batch = next(infinite_val_loader)
                 model.val_step(val_batch)
 
     # Train baselines
     if only_train in (None, "baselines"):
-        train_baselines(infinite_train_loader)
+        train_baselines()
         general_logger.success("Trained baselines")
     if only_train == "baselines":
         return
@@ -186,8 +180,7 @@ def run(
             for round_num in trange(g.num_communication_rounds):
                 validator.reset_slices_and_indices()
                 for miner in miners:
-                    features, targets = next(infinite_train_loader)
-                    miner.data = features.to(g.device), targets.to(g.device)
+                    miner.data = next(infinite_train_loader)
                     miner.model.train_step(miner.data)
                     slice = miner.get_slice_from_indices(validator.slice_indices)
                     validator.add_miner_slice(slice)

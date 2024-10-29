@@ -23,8 +23,8 @@ def infinite_data_loader_generator(dataset: Dataset[torch.Tensor], train: bool =
         )
 
         # Yield each batch in the current shuffled loader
-        for i, batch in enumerate(loader):
-            yield batch
+        for i, (features, targets) in enumerate(loader):
+            yield features.to(g.device), targets.to(g.device)
             # After reaching epoch_length, reshuffle by breaking and creating a new DataLoader
             if i + 1 == epoch_length:
                 break
