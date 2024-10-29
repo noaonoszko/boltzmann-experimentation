@@ -1,10 +1,33 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
 
 from boltzmann_experimentation.model import MODEL_TYPE
-from boltzmann_experimentation.settings import general_settings, perceptron_settings
+from boltzmann_experimentation.settings import (
+    general_settings as g,
+    perceptron_settings,
+)
 from timm.data import create_transform
+
+
+def infinite_data_loader_generator(dataset: Dataset[torch.Tensor], train: bool = True):
+    """Infinite data loader with automatic reshuffling every 'epoch_length' batches."""
+    epoch_length = len(dataset) // g.batch_size_train
+    while True:
+        # Create a new DataLoader with shuffled data
+        loader = DataLoader(
+            dataset,
+            batch_size=g.batch_size_train if train else g.batch_size_val,
+            num_workers=g.num_workers_dataloader,
+            shuffle=True,
+        )
+
+        # Yield each batch in the current shuffled loader
+        for i, batch in enumerate(loader):
+            yield batch
+            # After reaching epoch_length, reshuffle by breaking and creating a new DataLoader
+            if i + 1 == epoch_length:
+                break
 
 
 class DatasetFactory:
@@ -52,12 +75,10 @@ class DatasetFactory:
                 return train_dataset, val_dataset
             case "two-layer-perceptron" | "single-neuron-perceptron":
                 dataset = LinearRegressionDataset(
-                    general_settings.data_size, perceptron_settings.input_size
+                    g.data_size, perceptron_settings.input_size
                 )
                 # Split dataset into training and validation sets
-                train_size = int(
-                    (1 - general_settings.val_data_fraction) * len(dataset)
-                )
+                train_size = int((1 - g.val_data_fraction) * len(dataset))
                 val_size = len(dataset) - train_size
                 return torch.utils.data.random_split(dataset, [train_size, val_size])
             case _:

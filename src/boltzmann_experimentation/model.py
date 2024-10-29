@@ -10,7 +10,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
 from pydantic import BaseModel, Field
-from torch.utils.data import DataLoader
 
 import wandb
 from boltzmann_experimentation.logger import general_logger, metrics_logger
@@ -75,7 +74,7 @@ class ModelFactory:
                     ),
                     gamma=0.1,
                 )
-                g.batch_size = 64
+                g.batch_size_train = 64
             case "resnet18":
                 torch_model = models.resnet18()
                 torch_model.fc = torch.nn.Linear(torch_model.fc.in_features, 10)
@@ -199,9 +198,9 @@ class Model:
     def commit_log(self) -> None:
         wandb.log(self.log_data, commit=True)
 
-    def val_step(self, data: torch.Tensor) -> tuple[float, torch.types.Number, int]:
+    def val_step(self, batch: tuple[torch.Tensor, torch.Tensor]) -> None:
         general_logger.debug("Validation step")
-        inputs, targets = data
+        inputs, targets = batch
 
         # Compute loss without updating gradients
         with torch.no_grad():
@@ -211,32 +210,28 @@ class Model:
         # Calculate accuracy (assuming classification)
         _, predicted = torch.max(outputs, 1)  # Get the index of the max logit
         correct = (predicted == targets).sum().item()  # Count correct predictions
-        total = targets.size(0)  # Number of samples in the batch
+        num_samples = targets.size(0)  # Number of samples in the batch
 
-        return loss.item(), correct, total  # Return loss, correct preds, and total
+        loss = loss.item()
+        accuracy = correct / num_samples
+        if g.log_to_wandb:
+            self.add_metric_to_log("val_loss", loss)
+            self.add_metric_to_log("val_acc", accuracy)
+            self.commit_log()
 
-    def validate(self, val_loader: DataLoader[tuple[torch.Tensor, torch.Tensor]]):
-        """
-        Run validation over the entire validation dataset.
-        This method aggregates loss and accuracy over all validation batches.
-        """
+    def validate(self, batch: tuple[torch.Tensor, torch.Tensor]):
+        """Run validation over one batch."""
         total_loss = 0.0
         total_correct = 0
-        total_samples = 0
+        num_samples = 0
 
-        self.val_losses = torch.tensor([])  # Reset validation losses
-
-        # Loop through all validation batches
-        for features, targets in val_loader:
-            val_batch = (features.to(g.device), targets.to(g.device))
-            loss, correct, total = self.val_step(val_batch)
-            total_loss += loss * total  # Accumulate weighted loss
-            total_correct += correct  # Accumulate correct predictions
-            total_samples += total  # Accumulate total number of samples
+        loss, correct, num_samples = self.val_step(batch)
+        total_loss = loss * num_samples  # Accumulate weighted loss
+        total_correct = correct  # Accumulate correct predictions
 
         # Calculate average loss and accuracy over the entire validation set
-        avg_loss = total_loss / total_samples
-        avg_accuracy = total_correct / total_samples
+        avg_loss = total_loss / num_samples
+        avg_accuracy = total_correct / num_samples
 
         if g.log_to_wandb:
             self.add_metric_to_log("val_loss", avg_loss)
