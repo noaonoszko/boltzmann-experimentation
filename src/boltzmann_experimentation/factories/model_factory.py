@@ -31,7 +31,7 @@ class ModelFactory:
                 # Define loss and optimizer
                 criterion = torch.nn.CrossEntropyLoss()
                 optimizer = torch.optim.Adam(torch_model.parameters(), lr=1e-4)
-            case "densenet":
+            case "densenet" | "custom-densenet":
                 torch_model = torchvision.models.DenseNet(
                     growth_rate=24, num_classes=10
                 )

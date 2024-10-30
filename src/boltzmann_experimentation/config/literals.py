@@ -8,5 +8,6 @@ MODEL_TYPE = Literal[
     "simple-cnn",
     "resnet18",
     "densenet",
+    "custom-densenet",
     "deit-b",
 ]
