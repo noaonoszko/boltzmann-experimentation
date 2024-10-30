@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from datetime import datetime
 from pathlib import Path
 import torch
@@ -12,6 +13,9 @@ class PerceptronSettings(BaseSettings):
 
 
 class GeneralSettings(BaseSettings):
+    # Model
+    model_kwargs: dict = Field(default_factory=dict)
+
     # Distributed learning
     num_miners: int = -1
     num_communication_rounds: int = -1

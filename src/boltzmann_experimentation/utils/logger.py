@@ -2,7 +2,10 @@ from loguru import logger
 import sys
 from pathlib import Path
 import wandb
-from boltzmann_experimentation.config.settings import general_settings, start_ts
+from boltzmann_experimentation.config.settings import (
+    general_settings as g,
+    start_ts,
+)
 
 # Remove the default logger
 logger.remove()
@@ -38,6 +41,6 @@ def init_wandb_run(*, run_name: str, model_type: str) -> None:
         group=str(start_ts),
         config={
             "model_type": model_type,
-            "batch_size": general_settings.batch_size_train,
+            "batch_size": g.batch_size_train,
         },
     )
