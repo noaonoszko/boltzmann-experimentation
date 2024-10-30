@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
 
 from boltzmann_experimentation.config.literals import MODEL_TYPE
-from boltzmann_experimentation.settings import (
+from boltzmann_experimentation.config.settings import (
     general_settings as g,
     perceptron_settings,
 )

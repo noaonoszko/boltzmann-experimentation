@@ -15,7 +15,7 @@ import wandb
 from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation import models
 from boltzmann_experimentation.logger import general_logger, metrics_logger
-from boltzmann_experimentation.settings import (
+from boltzmann_experimentation.config.settings import (
     perceptron_settings,
     general_settings as g,
 )

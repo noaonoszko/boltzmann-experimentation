@@ -8,7 +8,7 @@ import torch
 import typer
 
 import wandb
-from boltzmann_experimentation.settings import general_settings
+from boltzmann_experimentation.config.settings import general_settings
 
 app = typer.Typer()
 
