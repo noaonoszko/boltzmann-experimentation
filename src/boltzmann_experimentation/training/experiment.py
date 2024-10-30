@@ -24,6 +24,7 @@ from boltzmann_experimentation.training.validator import Validator
 from boltzmann_experimentation.utils.viz import (
     InteractivePlotter,
 )
+import ast
 
 app = cyclopts.App()
 
@@ -40,8 +41,11 @@ def run(
     log_to_wandb: bool = True,
     same_model_init: bool | None = None,
     compression_factors: list[int] = [1, 10, 100, 1000],
+    model_kwargs: str | None = None,
 ):
     # Change pydantic settings
+    parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
+    g.model_kwargs |= parsed_model_kwargs
     g.num_miners = num_miners if num_miners else g.num_miners
     g.num_communication_rounds = (
         num_communication_rounds
