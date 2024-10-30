@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import torch
 
-from boltzmann_experimentation.validator import Validator
+from boltzmann_experimentation.training.validator import Validator
 from boltzmann_experimentation.utils.logger import general_logger
 
 
