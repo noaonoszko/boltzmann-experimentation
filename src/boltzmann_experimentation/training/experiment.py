@@ -21,7 +21,7 @@ from boltzmann_experimentation.factories import ModelFactory, DatasetFactory
 from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation.config.settings import general_settings as g, start_ts
 from boltzmann_experimentation.training.validator import Validator
-from boltzmann_experimentation.viz import (
+from boltzmann_experimentation.utils.viz import (
     InteractivePlotter,
 )
 
