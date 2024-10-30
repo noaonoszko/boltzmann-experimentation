@@ -2,7 +2,7 @@ from torch.optim.lr_scheduler import MultiStepLR, LRScheduler
 import json
 from copy import deepcopy
 from datetime import datetime
-from typing import Callable, Literal
+from typing import Callable
 
 import timm
 import torch
@@ -12,6 +12,7 @@ import torchvision
 from pydantic import BaseModel, Field
 
 import wandb
+from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation import models
 from boltzmann_experimentation.logger import general_logger, metrics_logger
 from boltzmann_experimentation.settings import (
@@ -30,16 +31,6 @@ class MinerSlice(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-
-
-MODEL_TYPE = Literal[
-    "single-neuron-perceptron",
-    "two-layer-perceptron",
-    "simple-cnn",
-    "resnet18",
-    "densenet",
-    "deit-b",
-]
 
 
 class ModelFactory:
