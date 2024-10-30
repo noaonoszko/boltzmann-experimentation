@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
 
-from boltzmann_experimentation.model import MODEL_TYPE
+from boltzmann_experimentation.training.model import MODEL_TYPE
 from boltzmann_experimentation.settings import (
     general_settings as g,
     perceptron_settings,

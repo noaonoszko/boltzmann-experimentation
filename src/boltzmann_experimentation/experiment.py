@@ -20,7 +20,7 @@ from boltzmann_experimentation.loss import (
     ExactLoss,
 )
 from boltzmann_experimentation.miner import Miner
-from boltzmann_experimentation.model import MODEL_TYPE, ModelFactory
+from boltzmann_experimentation.training.model import MODEL_TYPE, ModelFactory
 from boltzmann_experimentation.settings import general_settings as g, start_ts
 from boltzmann_experimentation.validator import Validator
 from boltzmann_experimentation.viz import (
