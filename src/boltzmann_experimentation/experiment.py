@@ -5,10 +5,6 @@ from tqdm import tqdm
 from tqdm.auto import trange
 
 import wandb
-from boltzmann_experimentation.dataset import (
-    DatasetFactory,
-    infinite_data_loader_generator,
-)
 from boltzmann_experimentation.config.literals import GPU, ONLY_TRAIN
 from boltzmann_experimentation.utils.logger import (
     add_file_logger,
@@ -19,8 +15,9 @@ from boltzmann_experimentation.utils.logger import (
 from boltzmann_experimentation.loss import (
     ExactLoss,
 )
+from boltzmann_experimentation.data.loaders import infinite_data_loader_generator
 from boltzmann_experimentation.miner import Miner
-from boltzmann_experimentation.factories import ModelFactory
+from boltzmann_experimentation.factories import ModelFactory, DatasetFactory
 from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation.config.settings import general_settings as g, start_ts
 from boltzmann_experimentation.validator import Validator

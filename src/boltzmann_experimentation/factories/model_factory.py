@@ -1,18 +1,19 @@
-from torch.optim.lr_scheduler import MultiStepLR
-
 import timm
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
+from torch.optim.lr_scheduler import MultiStepLR
 
-from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation import models
-from boltzmann_experimentation.training.model import Model
+from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation.config.settings import (
-    perceptron_settings,
     general_settings as g,
 )
+from boltzmann_experimentation.config.settings import (
+    perceptron_settings,
+)
+from boltzmann_experimentation.training.model import Model
 
 
 class ModelFactory:

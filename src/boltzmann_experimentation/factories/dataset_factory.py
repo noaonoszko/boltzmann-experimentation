@@ -1,33 +1,16 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
+from timm.data import create_transform
+from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 
 from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation.config.settings import (
     general_settings as g,
+)
+from boltzmann_experimentation.config.settings import (
     perceptron_settings,
 )
-from timm.data import create_transform
-
-
-def infinite_data_loader_generator(dataset: Dataset[torch.Tensor], train: bool = True):
-    """Infinite data loader with automatic reshuffling every 'epoch_length' batches."""
-    epoch_length = len(dataset) // g.batch_size_train
-    while True:
-        # Create a new DataLoader with shuffled data
-        loader = DataLoader(
-            dataset,
-            batch_size=g.batch_size_train if train else g.batch_size_val,
-            num_workers=g.num_workers_dataloader,
-            shuffle=True,
-        )
-
-        # Yield each batch in the current shuffled loader
-        for i, (features, targets) in enumerate(loader):
-            yield features.to(g.device), targets.to(g.device)
-            # After reaching epoch_length, reshuffle by breaking and creating a new DataLoader
-            if i + 1 == epoch_length:
-                break
+from boltzmann_experimentation.data.dataset import LinearRegressionDataset
 
 
 class DatasetFactory:
@@ -83,34 +66,3 @@ class DatasetFactory:
                 return torch.utils.data.random_split(dataset, [train_size, val_size])
             case _:
                 raise ValueError(f"Unsupported model type: {model_type}")
-
-
-class LinearRegressionDataset(Dataset):
-    def __init__(self, num_samples: int, num_features: int):
-        # Generate features and targets
-        self.features, self.targets = self._generate_linear_data(
-            num_samples, num_features
-        )
-
-    def _generate_linear_data(
-        self, num_samples: int, num_features: int
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        # Generate random features
-        X = torch.rand(num_samples, num_features)
-
-        # Generate random coefficient(s) for linear relationship
-        coefficients = (torch.rand(num_features) - 0.5) * 10
-        coefficients = 10 * torch.ones_like(coefficients)
-
-        # Normalize features
-        X = (X - X.mean(dim=0)) / X.std(dim=0)
-
-        # Generate targets
-        y = X @ coefficients + torch.randn(num_samples) * 1
-        return X, y.unsqueeze(1)
-
-    def __len__(self):
-        return len(self.features)
-
-    def __getitem__(self, idx):
-        return self.features[idx], self.targets[idx]
