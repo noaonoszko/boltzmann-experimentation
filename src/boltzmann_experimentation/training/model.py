@@ -10,7 +10,7 @@ import torch.optim as optim
 from pydantic import BaseModel, Field
 
 import wandb
-from boltzmann_experimentation.logger import general_logger, metrics_logger
+from boltzmann_experimentation.utils.logger import general_logger, metrics_logger
 from boltzmann_experimentation.config.settings import (
     general_settings as g,
 )

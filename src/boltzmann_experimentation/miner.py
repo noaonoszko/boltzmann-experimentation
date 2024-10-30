@@ -1,5 +1,5 @@
 import torch
-from boltzmann_experimentation.logger import general_logger
+from boltzmann_experimentation.utils.logger import general_logger
 
 from boltzmann_experimentation.training.model import MinerSlice, Model
 

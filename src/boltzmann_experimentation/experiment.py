@@ -10,7 +10,7 @@ from boltzmann_experimentation.dataset import (
     infinite_data_loader_generator,
 )
 from boltzmann_experimentation.config.literals import GPU, ONLY_TRAIN
-from boltzmann_experimentation.logger import (
+from boltzmann_experimentation.utils.logger import (
     add_file_logger,
     general_logger,
     init_wandb_run,
