@@ -12,7 +12,7 @@ from boltzmann_experimentation.utils.logger import (
     init_wandb_run,
     metrics_logger,
 )
-from boltzmann_experimentation.loss import (
+from boltzmann_experimentation.training.loss import (
     ExactLoss,
 )
 from boltzmann_experimentation.data.loaders import infinite_data_loader_generator
