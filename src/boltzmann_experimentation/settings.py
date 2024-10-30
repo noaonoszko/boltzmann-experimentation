@@ -18,7 +18,8 @@ class GeneralSettings(BaseSettings):
     compression_factor: int = 100
 
     # Data
-    batch_size: int = -1
+    batch_size_train: int = -1
+    batch_size_val: int = -1
     num_workers_dataloader: int = 4  # This will change based on the device
 
     # Synthetic data

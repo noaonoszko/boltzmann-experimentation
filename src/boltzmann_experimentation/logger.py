@@ -38,6 +38,6 @@ def init_wandb_run(*, run_name: str, model_type: str) -> None:
         group=str(start_ts),
         config={
             "model_type": model_type,
-            "batch_size": general_settings.batch_size,
+            "batch_size": general_settings.batch_size_train,
         },
     )

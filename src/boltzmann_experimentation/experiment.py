@@ -1,15 +1,14 @@
-import itertools
-from typing import Iterator
-
 import cyclopts
 import matplotlib.pyplot as plt
 import torch
-from torch.utils.data import DataLoader
 from tqdm import tqdm
 from tqdm.auto import trange
 
 import wandb
-from boltzmann_experimentation.dataset import DatasetFactory
+from boltzmann_experimentation.dataset import (
+    DatasetFactory,
+    infinite_data_loader_generator,
+)
 from boltzmann_experimentation.literals import GPU, ONLY_TRAIN
 from boltzmann_experimentation.logger import (
     add_file_logger,
@@ -22,8 +21,7 @@ from boltzmann_experimentation.loss import (
 )
 from boltzmann_experimentation.miner import Miner
 from boltzmann_experimentation.model import MODEL_TYPE, ModelFactory
-from boltzmann_experimentation.settings import general_settings as g
-from boltzmann_experimentation.settings import start_ts
+from boltzmann_experimentation.settings import general_settings as g, start_ts
 from boltzmann_experimentation.validator import Validator
 from boltzmann_experimentation.viz import (
     InteractivePlotter,
@@ -37,7 +35,8 @@ def run(
     model_type: MODEL_TYPE,
     num_miners: int = 5,
     num_communication_rounds: int = 3000,
-    batch_size: int = 128,
+    batch_size_train: int = 128,
+    batch_size_val: int = 512,
     gpu: GPU | None = None,
     only_train: ONLY_TRAIN | None = None,
     log_to_wandb: bool = True,
@@ -51,7 +50,8 @@ def run(
         if num_communication_rounds
         else g.num_communication_rounds
     )
-    g.batch_size = batch_size if batch_size else g.batch_size
+    g.batch_size_train = batch_size_train
+    g.batch_size_val = batch_size_val
     g.set_device(gpu)
     g.log_to_wandb = log_to_wandb
     same_model_init_values = (
@@ -71,23 +71,12 @@ def run(
         f"Created train dataset of length {len(train_dataset)} and val dataset of length {len(val_dataset)} for model {model_type}"
     )
 
-    # Create DataLoader for training and validation sets
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=g.batch_size,
-        num_workers=g.num_workers_dataloader,
-        shuffle=True,
-    )
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=g.batch_size,
-        num_workers=g.num_workers_dataloader,
-        shuffle=False,
-    )
+    # Infinite iterator for training
+    infinite_train_loader = infinite_data_loader_generator(train_dataset, train=True)
+    infinite_val_loader = infinite_data_loader_generator(val_dataset, train=False)
+    validator_val_losses_compression_factor = {}
 
-    def train_baselines(
-        infinite_train_loader: Iterator[tuple[torch.Tensor, torch.Tensor]],
-    ) -> None:
+    def train_baselines() -> None:
         for same_model_init in tqdm(same_model_init_values):
             if same_model_init:
                 torch.manual_seed(SEED)
@@ -97,20 +86,17 @@ def run(
                 wandb.finish()
                 run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
                 init_wandb_run(run_name=run_name, model_type=model_type)
-            model.validate(val_loader)
+            val_batch = next(infinite_val_loader)
+            model.val_step(val_batch)
             for _ in trange(g.num_communication_rounds):
-                features, targets = next(infinite_train_loader)
-                data = features.to(g.device), targets.to(g.device)
-                model.train_step(data)
-                model.validate(val_loader)
-
-    # Infinite iterator for training
-    infinite_train_loader = itertools.cycle(train_loader)
-    validator_val_losses_compression_factor = {}
+                batch = next(infinite_train_loader)
+                model.train_step(batch)
+                val_batch = next(infinite_val_loader)
+                model.val_step(val_batch)
 
     # Train baselines
     if only_train in (None, "baselines"):
-        train_baselines(infinite_train_loader)
+        train_baselines()
         general_logger.success("Trained baselines")
     if only_train == "baselines":
         return
@@ -187,14 +173,14 @@ def run(
                 init_wandb_run(run_name=run_name, model_type=model_type)
 
             # Validate the initial model
-            validator.model.validate(val_loader)
+            val_batch = next(infinite_val_loader)
+            validator.model.val_step(val_batch)
 
             # Training loop
             for round_num in trange(g.num_communication_rounds):
                 validator.reset_slices_and_indices()
                 for miner in miners:
-                    features, targets = next(infinite_train_loader)
-                    miner.data = features.to(g.device), targets.to(g.device)
+                    miner.data = next(infinite_train_loader)
                     miner.model.train_step(miner.data)
                     slice = miner.get_slice_from_indices(validator.slice_indices)
                     validator.add_miner_slice(slice)
@@ -210,7 +196,8 @@ def run(
                     slices=list(validator.slices.values()),
                     slice_indices=validator.slice_indices,
                 )
-                validator.model.validate(val_loader)
+                val_batch = next(infinite_val_loader)
+                validator.model.val_step(val_batch)
 
                 for miner in miners:
                     validator_model_params = torch.nn.utils.parameters_to_vector(
