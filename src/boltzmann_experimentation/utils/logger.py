@@ -2,7 +2,7 @@ from loguru import logger
 import sys
 from pathlib import Path
 import wandb
-from boltzmann_experimentation.settings import general_settings, start_ts
+from boltzmann_experimentation.config.settings import general_settings, start_ts
 
 # Remove the default logger
 logger.remove()
