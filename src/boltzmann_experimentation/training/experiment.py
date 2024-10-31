@@ -92,8 +92,10 @@ def run(
             model.val_step(val_batch)
             for _ in trange(g.num_communication_rounds):
                 batch = next(infinite_train_loader)
+                model.torch_model.train()
                 model.train_step(batch)
                 val_batch = next(infinite_val_loader)
+                model.torch_model.eval()
                 model.val_step(val_batch)
                 if model.lr_scheduler is not None:
                     model.lr_scheduler.step()
