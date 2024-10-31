@@ -95,6 +95,8 @@ def run(
                 model.train_step(batch)
                 val_batch = next(infinite_val_loader)
                 model.val_step(val_batch)
+                if model.lr_scheduler is not None:
+                    model.lr_scheduler.step()
 
     # Train baselines
     if only_train in (None, "baselines"):
