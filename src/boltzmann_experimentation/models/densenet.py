@@ -116,7 +116,11 @@ class DenseNet(nn.Module):
 class _Transition(nn.Sequential):
     def __init__(self, num_input_features: int, num_output_features: int) -> None:
         super().__init__()
-        self.norm = nn.BatchNorm2d(num_input_features)
+        self.norm = (
+            nn.BatchNorm2d(num_input_features)
+            if g.model_kwargs.get("batch_norm")
+            else nn.Identity()
+        )
         self.relu = nn.ReLU(inplace=True)
         self.conv = nn.Conv2d(
             num_input_features, num_output_features, kernel_size=1, stride=1, bias=False
