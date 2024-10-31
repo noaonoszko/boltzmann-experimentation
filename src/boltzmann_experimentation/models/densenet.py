@@ -1,13 +1,15 @@
+from collections import OrderedDict
+
 import torch
-from torch import Tensor
-import torch.nn.functional as F
 import torch.nn as nn
+import torch.nn.functional as F
+import torch.utils.checkpoint as cp
+from torch import Tensor
+from torchvision.utils import _log_api_usage_once
 
 from boltzmann_experimentation.config.settings import (
     general_settings as g,
 )
-from torchvision.utils import _log_api_usage_once
-from collections import OrderedDict
 
 
 class DenseNet(nn.Module):
@@ -170,6 +172,56 @@ class _DenseLayer(nn.Module):
 
         self.drop_rate = float(drop_rate)
         self.memory_efficient = memory_efficient
+
+    def bn_function(self, inputs: list[Tensor]) -> Tensor:
+        concated_features = torch.cat(inputs, 1)
+        bottleneck_output = self.conv1(self.relu1(self.norm1(concated_features)))  # noqa: T484
+        return bottleneck_output
+
+    # todo: rewrite when torchscript supports any
+    def any_requires_grad(self, input: list[Tensor]) -> bool:
+        for tensor in input:
+            if tensor.requires_grad:
+                return True
+        return False
+
+    @torch.jit.unused  # noqa: T484
+    def call_checkpoint_bottleneck(self, input: list[Tensor]) -> Tensor:
+        def closure(*inputs):
+            return self.bn_function(inputs)
+
+        return cp.checkpoint(closure, *input, use_reentrant=False)
+
+    @torch.jit._overload_method  # noqa: F811
+    def forward(self, input: list[Tensor]) -> Tensor:  # noqa: F811
+        pass
+
+    @torch.jit._overload_method  # noqa: F811
+    def forward(self, input: Tensor) -> Tensor:  # noqa: F811
+        pass
+
+    # torchscript does not yet support *args, so we overload method
+    # allowing it to take either a List[Tensor] or single Tensor
+    def forward(self, input: Tensor) -> Tensor:  # noqa: F811
+        if isinstance(input, Tensor):
+            prev_features = [input]
+        else:
+            prev_features = input
+
+        if self.memory_efficient and self.any_requires_grad(prev_features):
+            if torch.jit.is_scripting():
+                raise Exception("Memory Efficient not supported in JIT")
+
+            bottleneck_output = self.call_checkpoint_bottleneck(prev_features)
+        else:
+            bottleneck_output = self.bn_function(prev_features)
+
+        new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
+        if self.drop_rate > 0:
+            new_features = F.dropout(
+                new_features, p=self.drop_rate, training=self.training
+            )
+        return new_features
 
 
 class _DenseBlock(nn.ModuleDict):
