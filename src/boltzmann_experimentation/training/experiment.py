@@ -42,6 +42,7 @@ def run(
     same_model_init: bool | None = None,
     compression_factors: list[int] = [1, 10, 100, 1000],
     model_kwargs: str | None = None,
+    agg_bn_params: bool = True,
 ):
     # Change pydantic settings
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
@@ -56,6 +57,7 @@ def run(
     g.batch_size_val = batch_size_val
     g.set_device(gpu)
     g.log_to_wandb = log_to_wandb
+    g.agg_bn_params = agg_bn_params
     same_model_init_values = (
         [True, False] if same_model_init is None else [same_model_init]
     )

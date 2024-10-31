@@ -20,6 +20,7 @@ class GeneralSettings(BaseSettings):
     num_miners: int = -1
     num_communication_rounds: int = -1
     compression_factor: int = 100
+    agg_bn_params: bool = True
 
     # Data
     batch_size_train: int = -1
