@@ -5,7 +5,7 @@ import torch.nn as nn
 from boltzmann_experimentation.config.settings import (
     general_settings as g,
 )
-from torchvision.models.densenet import _DenseBlock, _Transition
+from torchvision.models.densenet import _DenseBlock
 from torchvision.utils import _log_api_usage_once
 from collections import OrderedDict
 
@@ -111,3 +111,14 @@ class DenseNet(nn.Module):
         out = torch.flatten(out, 1)
         out = self.classifier(out)
         return out
+
+
+class _Transition(nn.Sequential):
+    def __init__(self, num_input_features: int, num_output_features: int) -> None:
+        super().__init__()
+        self.norm = nn.BatchNorm2d(num_input_features)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(
+            num_input_features, num_output_features, kernel_size=1, stride=1, bias=False
+        )
+        self.pool = nn.AvgPool2d(kernel_size=2, stride=2)
