@@ -32,9 +32,7 @@ class ModelFactory:
                 criterion = torch.nn.CrossEntropyLoss()
                 optimizer = torch.optim.Adam(torch_model.parameters(), lr=1e-4)
             case "densenet":
-                torch_model = torchvision.models.DenseNet(
-                    growth_rate=24, num_classes=10
-                )
+                torch_model = models.DenseNet121()
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.SGD(
                     torch_model.parameters(),
@@ -51,7 +49,7 @@ class ModelFactory:
                     ),
                     gamma=0.1,
                 )
-                g.batch_size_train = 64
+                g.batch_size_train = 128
             case "resnet18":
                 torch_model = torchvision.models.resnet18()
                 torch_model.fc = torch.nn.Linear(torch_model.fc.in_features, 10)

@@ -3,10 +3,10 @@ from typing import Any
 
 import numpy as np
 import torch
-
-from boltzmann_experimentation.utils.logger import general_logger
-from boltzmann_experimentation.training.model import MinerSlice, Model
 from boltzmann_experimentation.config.settings import general_settings
+from boltzmann_experimentation.config.settings import general_settings as g
+from boltzmann_experimentation.training.model import MinerSlice, Model
+from boltzmann_experimentation.utils.logger import general_logger
 
 
 class Validator:
@@ -22,10 +22,31 @@ class Validator:
         self.scores = defaultdict(lambda: torch.tensor([]))
         self.slices = {}
         self.slice_indices = torch.Tensor([])
+        self.included_param_indices: list[int] | None = None
         self.reset_slices_and_indices()
 
     def add_miner_slice(self, miner_slice: MinerSlice) -> None:
         self.slices.update({miner_slice.miner_id: miner_slice.data})
+
+    def set_included_param_indices(self):
+        non_bn_indices = []
+        current_index = 0
+
+        # Iterate over all parameters in the model
+        for module in self.model.torch_model.modules():
+            for param in module.parameters(recurse=False):
+                num_params = param.numel()
+                # Exclude indices if the module is BatchNorm2d
+                if not isinstance(module, torch.nn.BatchNorm2d):
+                    non_bn_indices.extend(
+                        range(current_index, current_index + num_params)
+                    )
+                current_index += num_params
+
+        self.included_param_indices = non_bn_indices
+        general_logger.debug(
+            f"Included param indices: {len(self.included_param_indices)}, total {self.model.num_params()}"
+        )
 
     def reset_slices_and_indices(self):
         # Reset slices
@@ -36,8 +57,15 @@ class Validator:
         slice_size = num_params_total // general_settings.compression_factor
 
         # Define indices
+        if g.agg_bn_params and self.included_param_indices is None:
+            self.set_included_param_indices()
+        a = (
+            self.model.num_params()
+            if self.included_param_indices is None
+            else self.included_param_indices
+        )
         self.slice_indices = torch.tensor(
-            np.random.choice(num_params_total, slice_size, replace=False)
+            np.random.choice(a, slice_size, replace=False)
         )
         general_logger.debug(f"Total number of parameters: {num_params_total}")
         general_logger.debug(
