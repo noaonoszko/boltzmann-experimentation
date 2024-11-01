@@ -31,16 +31,8 @@ class ModelFactory:
                 # Define loss and optimizer
                 criterion = torch.nn.CrossEntropyLoss()
                 optimizer = torch.optim.Adam(torch_model.parameters(), lr=1e-4)
-            case "densenet" | "densenet-kuangliu":
-                match model_type:
-                    case "densenet":
-                        torch_model = torchvision.models.DenseNet(
-                            growth_rate=24, num_classes=10
-                        )
-                    case "densenet-kuangliu":
-                        torch_model = models.DenseNet121()
-                    case _:
-                        raise ValueError(f"Unsupported model type: {model_type}")
+            case "densenet":
+                torch_model = models.DenseNet121()
                 criterion = nn.CrossEntropyLoss()
                 optimizer = optim.SGD(
                     torch_model.parameters(),
@@ -57,7 +49,7 @@ class ModelFactory:
                     ),
                     gamma=0.1,
                 )
-                g.batch_size_train = 128 if model_type == "densenet-kuangliu" else 64
+                g.batch_size_train = 128
             case "resnet18":
                 torch_model = torchvision.models.resnet18()
                 torch_model.fc = torch.nn.Linear(torch_model.fc.in_features, 10)
