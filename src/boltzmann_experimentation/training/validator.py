@@ -5,7 +5,8 @@ import numpy as np
 import torch
 from boltzmann_experimentation.config.settings import general_settings
 from boltzmann_experimentation.config.settings import general_settings as g
-from boltzmann_experimentation.training.model import MinerSlice, Model
+from boltzmann_experimentation.training.model import Model
+from boltzmann_experimentation.schemas import MinerSlice
 from boltzmann_experimentation.utils.logger import general_logger
 
 

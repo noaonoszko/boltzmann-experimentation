@@ -15,6 +15,7 @@ from boltzmann_experimentation.utils.logger import (
 from boltzmann_experimentation.training.loss import (
     ExactLoss,
 )
+from boltzmann_experimentation.factories import TrainingComponentsFactory
 from boltzmann_experimentation.data.loaders import infinite_data_loader_generator
 from boltzmann_experimentation.training.miner import Miner
 from boltzmann_experimentation.factories import ModelFactory, DatasetFactory
@@ -65,6 +66,8 @@ def run(
     general_logger.info(
         f"Starting experiment on device {g.device} with {same_model_init_values=} and {compression_factors=}"
     )
+    # Use TrainingComponentsFactory to create components based on the initialized torch_model
+    t = TrainingComponentsFactory.create_components(model_type)
 
     PLOT_INTERACTIVELY = False
     SEED = 42
@@ -84,7 +87,7 @@ def run(
         for same_model_init in tqdm(same_model_init_values):
             if same_model_init:
                 torch.manual_seed(SEED)
-            model = ModelFactory.create_model(model_type)
+            model = ModelFactory.create_model(t)
             general_logger.info(f"Model has {model.num_params()/1e6:.0f}M params.")
             if log_to_wandb:
                 wandb.finish()
@@ -104,7 +107,11 @@ def run(
 
     # Train baselines
     if only_train in (None, "baselines"):
+        g.batch_size_train *= g.num_miners
+        t.initial_lr *= g.num_miners
         train_baselines()
+        g.batch_size_train //= g.num_miners
+        t.initial_lr //= g.num_miners
         general_logger.success("Trained baselines")
     if only_train == "baselines":
         return
@@ -131,10 +138,10 @@ def run(
             for _ in range(g.num_miners):
                 if same_model_init:
                     torch.manual_seed(SEED)
-                miner_models.append(ModelFactory.create_model(model_type))
+                miner_models.append(ModelFactory.create_model(t))
             if same_model_init:
                 torch.manual_seed(SEED)
-            validator_model = ModelFactory.create_model(model_type)
+            validator_model = ModelFactory.create_model(t)
             validator_model.torch_model.eval()
             general_logger.success(
                 f"Created {len(miner_models)} miner models and a validator model"
