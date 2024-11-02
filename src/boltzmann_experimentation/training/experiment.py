@@ -92,7 +92,9 @@ def run(
             if log_to_wandb:
                 wandb.finish()
                 run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
-                init_wandb_run(run_name=run_name, model_type=model_type)
+                init_wandb_run(
+                    run_name=run_name, model_type=model_type, training_components=t
+                )
             val_batch = next(infinite_val_loader)
             model.val_step(val_batch)
             for _ in trange(g.num_communication_rounds):
@@ -185,7 +187,9 @@ def run(
             if log_to_wandb:
                 wandb.finish()
                 run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
-                init_wandb_run(run_name=run_name, model_type=model_type)
+                init_wandb_run(
+                    run_name=run_name, model_type=model_type, training_components=t
+                )
 
             # Validate the initial model
             val_batch = next(infinite_val_loader)

@@ -6,6 +6,7 @@ from boltzmann_experimentation.config.settings import (
     general_settings as g,
     start_ts,
 )
+from boltzmann_experimentation.schemas.training_components import TrainingComponents
 
 # Remove the default logger
 logger.remove()
@@ -34,7 +35,9 @@ def add_file_logger(log_dir: Path) -> None:
     )
 
 
-def init_wandb_run(*, run_name: str, model_type: str) -> None:
+def init_wandb_run(
+    *, run_name: str, model_type: str, training_components: TrainingComponents
+) -> None:
     wandb.init(
         project="chakana",
         name=run_name,
@@ -42,5 +45,7 @@ def init_wandb_run(*, run_name: str, model_type: str) -> None:
         config={
             "model_type": model_type,
             "batch_size": g.batch_size_train,
-        },
+        }
+        | g.model_config
+        | training_components.__dict__,
     )
