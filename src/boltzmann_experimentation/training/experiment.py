@@ -104,7 +104,9 @@ def run(
 
     # Train baselines
     if only_train in (None, "baselines"):
+        g.batch_size_train *= g.num_miners
         train_baselines()
+        g.batch_size_train //= g.num_miners
         general_logger.success("Trained baselines")
     if only_train == "baselines":
         return
