@@ -1,31 +1,17 @@
 from torch.optim.lr_scheduler import LRScheduler
 import json
 from copy import deepcopy
-from datetime import datetime
 from typing import Callable
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from pydantic import BaseModel, Field
 
 import wandb
 from boltzmann_experimentation.utils.logger import general_logger, metrics_logger
 from boltzmann_experimentation.config.settings import (
     general_settings as g,
 )
-
-
-class MinerSlice(BaseModel):
-    miner_id: int = Field(..., description="Unique identifier for the miner")
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="Timestamp of when the slice was uploaded",
-    )
-    data: torch.Tensor = Field(..., description="Slice of the model's parameters")
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class Model:
