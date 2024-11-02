@@ -13,6 +13,13 @@ class PerceptronSettings(BaseSettings):
 
 
 class GeneralSettings(BaseSettings):
+    """
+    General settings used for the experiment.
+
+    Note! -1 default values are temporary and are overridden, mostly by CLI
+    arguments or their defaults but in some cases elsewhere.
+    """
+
     # Model
     model_kwargs: dict = Field(default_factory=dict)
 
