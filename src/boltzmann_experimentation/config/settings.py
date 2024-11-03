@@ -56,6 +56,8 @@ class GeneralSettings(BaseSettings):
     # Logging
     log_to_wandb: bool = True
 
+    model_config = {"protected_namespaces": ("settings_",)}
+
 
 perceptron_settings = PerceptronSettings()
 general_settings = GeneralSettings()
