@@ -36,16 +36,21 @@ def add_file_logger(log_dir: Path) -> None:
 
 
 def init_wandb_run(
-    *, run_name: str, model_type: str, training_components: TrainingComponents
+    *,
+    run_name: str,
+    model_type: str,
+    training_components: TrainingComponents,
+    start_ts_str: str | None = None,
 ) -> None:
     wandb.init(
         project="chakana",
         name=run_name,
-        group=str(start_ts),
+        group=start_ts_str if start_ts_str is not None else str(start_ts),
         config={
             "model_type": model_type,
             "batch_size": g.batch_size_train,
         }
         | g.model_config
         | training_components.__dict__,
+        resume="allow",
     )
