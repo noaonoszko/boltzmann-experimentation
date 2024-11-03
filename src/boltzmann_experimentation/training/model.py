@@ -44,7 +44,7 @@ class Model:
     def commit_log(self) -> None:
         wandb.log(self.log_data, commit=True)
 
-    def val_step(self, batch: tuple[torch.Tensor, torch.Tensor]) -> None:
+    def val_step(self, batch: tuple[torch.Tensor, torch.Tensor]) -> float:
         general_logger.debug("Validation step")
         inputs, targets = batch
 
@@ -64,6 +64,7 @@ class Model:
             self.add_metric_to_log("val_loss", loss)
             self.add_metric_to_log("val_acc", accuracy)
             self.commit_log()
+        return accuracy
 
     def validate(self, batch: tuple[torch.Tensor, torch.Tensor]):
         """Run validation over one batch."""

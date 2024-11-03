@@ -15,6 +15,7 @@ from boltzmann_experimentation.utils.logger import (
 from boltzmann_experimentation.training.loss import (
     ExactLoss,
 )
+from boltzmann_experimentation.training.training_loop import TrainingLoop
 from boltzmann_experimentation.factories import TrainingComponentsFactory
 from boltzmann_experimentation.data.loaders import infinite_data_loader_generator
 from boltzmann_experimentation.training.miner import Miner
@@ -172,7 +173,6 @@ def run(
             general_logger.success("Created validator")
 
             # Set up interactive logging
-            interactive_plotter = None
             if PLOT_INTERACTIVELY:
                 xlim = (
                     val_dataset.features.min().item(),
@@ -182,7 +182,7 @@ def run(
                     val_dataset.targets.min().item() - 2,
                     val_dataset.targets.max().item() + 2,
                 )
-                interactive_plotter = InteractivePlotter(xlim, ylim)
+                InteractivePlotter(xlim, ylim)
 
             if log_to_wandb:
                 wandb.finish()
@@ -196,46 +196,12 @@ def run(
             validator.model.val_step(val_batch)
 
             # Training loop
-            for round_num in trange(g.num_communication_rounds):
-                validator.reset_slices_and_indices()
-                for miner in miners:
-                    miner.data = next(infinite_train_loader)
-                    miner.model.train_step(miner.data)
-                    slice = miner.get_slice_from_indices(validator.slice_indices)
-                    validator.add_miner_slice(slice)
-
-                for miner in miners:
-                    validator.calculate_miner_score(
-                        validator.slices[miner.id],
-                        miner.id,
-                        miner.data,
-                    )
-
-                validator.model.torch_model = validator.model.aggregate_slices(
-                    slices=list(validator.slices.values()),
-                    slice_indices=validator.slice_indices,
-                )
-                val_batch = next(infinite_val_loader)
-                validator.model.val_step(val_batch)
-
-                for miner in miners:
-                    validator_model_params = torch.nn.utils.parameters_to_vector(
-                        validator.model.torch_model.parameters()
-                    )
-                    validator_slice = validator_model_params[validator.slice_indices]
-                    miner.model.update_with_slice(
-                        validator_slice, validator.slice_indices
-                    )
-                    if miner.model.lr_scheduler is not None:
-                        miner.model.lr_scheduler.step()
-
-                if PLOT_INTERACTIVELY and interactive_plotter is not None:
-                    interactive_plotter.plot_data_and_model(
-                        torch_model=validator.model.torch_model,
-                        features=val_dataset.features,
-                        targets=val_dataset.targets,
-                    )
-
+            TrainingLoop(
+                validator=validator,
+                miners=miners,
+                infinite_train_loader=infinite_train_loader,
+                infinite_val_loader=infinite_val_loader,
+            ).run()
             if PLOT_INTERACTIVELY:
                 # Disable interactive mode when done and keep the final plot displayed
                 plt.ioff()
