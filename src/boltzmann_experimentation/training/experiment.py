@@ -1,5 +1,4 @@
 import cyclopts
-import matplotlib.pyplot as plt
 import torch
 from tqdm import tqdm
 from tqdm.auto import trange
@@ -23,9 +22,6 @@ from boltzmann_experimentation.factories import ModelFactory, DatasetFactory
 from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation.config.settings import general_settings as g, start_ts
 from boltzmann_experimentation.training.validator import Validator
-from boltzmann_experimentation.utils.viz import (
-    InteractivePlotter,
-)
 import ast
 
 app = cyclopts.App()
@@ -70,7 +66,6 @@ def run(
     # Use TrainingComponentsFactory to create components based on the initialized torch_model
     t = TrainingComponentsFactory.create_components(model_type)
 
-    PLOT_INTERACTIVELY = False
     SEED = 42
 
     # Generate the appropriate dataset for the model type
@@ -172,18 +167,6 @@ def run(
             )
             general_logger.success("Created validator")
 
-            # Set up interactive logging
-            if PLOT_INTERACTIVELY:
-                xlim = (
-                    val_dataset.features.min().item(),
-                    val_dataset.features.max().item(),
-                )
-                ylim = (
-                    val_dataset.targets.min().item() - 2,
-                    val_dataset.targets.max().item() + 2,
-                )
-                InteractivePlotter(xlim, ylim)
-
             if log_to_wandb:
                 wandb.finish()
                 run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
@@ -202,16 +185,10 @@ def run(
                 infinite_train_loader=infinite_train_loader,
                 infinite_val_loader=infinite_val_loader,
             ).run()
-            if PLOT_INTERACTIVELY:
-                # Disable interactive mode when done and keep the final plot displayed
-                plt.ioff()
-                plt.show()
 
             validator_val_losses_compression_factor.update(
                 {f"{same_model_init}/{compression_factor}": validator.model.val_losses}
             )
-
-            # plot_scores(validator.scores)
 
 
 if __name__ == "__main__":
