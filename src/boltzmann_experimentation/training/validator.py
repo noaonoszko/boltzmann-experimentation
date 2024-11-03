@@ -58,7 +58,7 @@ class Validator:
         slice_size = num_params_total // general_settings.compression_factor
 
         # Define indices
-        if g.agg_bn_params and self.included_param_indices is None:
+        if not g.agg_bn_params and self.included_param_indices is None:
             self.set_included_param_indices()
         a = (
             self.model.num_params()
