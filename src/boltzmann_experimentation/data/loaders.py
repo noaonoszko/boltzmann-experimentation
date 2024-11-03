@@ -1,11 +1,14 @@
 import torch
+from typing import Iterator
 from boltzmann_experimentation.config.settings import (
     general_settings as g,
 )
 from torch.utils.data import DataLoader, Dataset
 
 
-def infinite_data_loader_generator(dataset: Dataset[torch.Tensor], train: bool = True):
+def infinite_data_loader_generator(
+    dataset: Dataset[torch.Tensor], train: bool = True
+) -> Iterator[tuple[torch.Tensor, torch.Tensor]]:
     """Infinite data loader with automatic reshuffling every 'epoch_length' batches."""
     epoch_length = len(dataset) // g.batch_size_train
     while True:
