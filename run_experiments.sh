@@ -16,7 +16,7 @@ start_ts=$(date +"%Y-%m-%d %H:%M:%S.%N")
 run_num=0
 
 # Loop through all combinations
-for same_model in "--same-model-init" "--no-same-model-init"; do
+for same_model in "--same-model-init"; do
     for compression in 1 10 100 1000; do
         # Create a unique directory for each run based on timestamp, `same_model`, and `compression`
         model_init_status=$( [[ $same_model == "--same-model-init" ]] && echo "True" || echo "False" )
