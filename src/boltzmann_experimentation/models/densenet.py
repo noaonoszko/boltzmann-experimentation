@@ -28,23 +28,29 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from boltzmann_experimentation.config.literals import NORM_TYPE
 from boltzmann_experimentation.config.settings import general_settings as g
+
+
+def get_norm_layer(num_features):
+    norm_type: NORM_TYPE = g.model_kwargs.get("norm")
+    match norm_type:
+        case "batch":
+            return nn.BatchNorm2d(num_features)
+        case "group":
+            return nn.GroupNorm(8, num_features)  # Adjust number of groups if needed
+        case None:
+            return nn.Identity()
+        case _:
+            raise ValueError(f"Unsupported norm type: {norm_type}")
 
 
 class Bottleneck(nn.Module):
     def __init__(self, in_planes, growth_rate):
         super(Bottleneck, self).__init__()
-        self.bn1 = (
-            nn.BatchNorm2d(in_planes)
-            if g.model_kwargs.get("batch_norm")
-            else nn.Identity()
-        )
+        self.bn1 = get_norm_layer(in_planes)
         self.conv1 = nn.Conv2d(in_planes, 4 * growth_rate, kernel_size=1, bias=False)
-        self.bn2 = (
-            nn.BatchNorm2d(4 * growth_rate)
-            if g.model_kwargs.get("batch_norm")
-            else nn.Identity()
-        )
+        self.bn2 = get_norm_layer(4 * growth_rate)
         self.conv2 = nn.Conv2d(
             4 * growth_rate, growth_rate, kernel_size=3, padding=1, bias=False
         )
@@ -59,11 +65,7 @@ class Bottleneck(nn.Module):
 class Transition(nn.Module):
     def __init__(self, in_planes, out_planes):
         super(Transition, self).__init__()
-        self.bn = (
-            nn.BatchNorm2d(in_planes)
-            if g.model_kwargs.get("batch_norm")
-            else nn.Identity()
-        )
+        self.bn = get_norm_layer(in_planes)
         self.conv = nn.Conv2d(in_planes, out_planes, kernel_size=1, bias=False)
 
     def forward(self, x):
@@ -101,11 +103,7 @@ class DenseNet(nn.Module):
         self.dense4 = self._make_dense_layers(block, num_planes, nblocks[3])
         num_planes += nblocks[3] * growth_rate
 
-        self.bn = (
-            nn.BatchNorm2d(num_planes)
-            if g.model_kwargs.get("batch_norm")
-            else nn.Identity()
-        )
+        self.bn = get_norm_layer(num_planes)
         self.linear = nn.Linear(num_planes, num_classes)
 
     def _make_dense_layers(self, block, in_planes, nblock):

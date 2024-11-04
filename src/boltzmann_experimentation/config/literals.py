@@ -10,3 +10,4 @@ MODEL_TYPE = Literal[
     "densenet",
     "deit-b",
 ]
+NORM_TYPE = Literal["batch", "group"] | None
