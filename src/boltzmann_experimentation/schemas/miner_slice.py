@@ -11,5 +11,4 @@ class MinerSlice(BaseModel):
     )
     data: torch.Tensor = Field(..., description="Slice of the model's parameters")
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}

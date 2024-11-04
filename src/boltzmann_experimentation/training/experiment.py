@@ -1,5 +1,4 @@
 import cyclopts
-import matplotlib.pyplot as plt
 import torch
 from tqdm import tqdm
 from tqdm.auto import trange
@@ -15,6 +14,7 @@ from boltzmann_experimentation.utils.logger import (
 from boltzmann_experimentation.training.loss import (
     ExactLoss,
 )
+from boltzmann_experimentation.training.training_loop import TrainingLoop
 from boltzmann_experimentation.factories import TrainingComponentsFactory
 from boltzmann_experimentation.data.loaders import infinite_data_loader_generator
 from boltzmann_experimentation.training.miner import Miner
@@ -22,9 +22,6 @@ from boltzmann_experimentation.factories import ModelFactory, DatasetFactory
 from boltzmann_experimentation.config.literals import MODEL_TYPE
 from boltzmann_experimentation.config.settings import general_settings as g, start_ts
 from boltzmann_experimentation.training.validator import Validator
-from boltzmann_experimentation.utils.viz import (
-    InteractivePlotter,
-)
 import ast
 
 app = cyclopts.App()
@@ -69,7 +66,6 @@ def run(
     # Use TrainingComponentsFactory to create components based on the initialized torch_model
     t = TrainingComponentsFactory.create_components(model_type)
 
-    PLOT_INTERACTIVELY = False
     SEED = 42
 
     # Generate the appropriate dataset for the model type
@@ -171,19 +167,6 @@ def run(
             )
             general_logger.success("Created validator")
 
-            # Set up interactive logging
-            interactive_plotter = None
-            if PLOT_INTERACTIVELY:
-                xlim = (
-                    val_dataset.features.min().item(),
-                    val_dataset.features.max().item(),
-                )
-                ylim = (
-                    val_dataset.targets.min().item() - 2,
-                    val_dataset.targets.max().item() + 2,
-                )
-                interactive_plotter = InteractivePlotter(xlim, ylim)
-
             if log_to_wandb:
                 wandb.finish()
                 run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
@@ -196,56 +179,16 @@ def run(
             validator.model.val_step(val_batch)
 
             # Training loop
-            for round_num in trange(g.num_communication_rounds):
-                validator.reset_slices_and_indices()
-                for miner in miners:
-                    miner.data = next(infinite_train_loader)
-                    miner.model.train_step(miner.data)
-                    slice = miner.get_slice_from_indices(validator.slice_indices)
-                    validator.add_miner_slice(slice)
-
-                for miner in miners:
-                    validator.calculate_miner_score(
-                        validator.slices[miner.id],
-                        miner.id,
-                        miner.data,
-                    )
-
-                validator.model.torch_model = validator.model.aggregate_slices(
-                    slices=list(validator.slices.values()),
-                    slice_indices=validator.slice_indices,
-                )
-                val_batch = next(infinite_val_loader)
-                validator.model.val_step(val_batch)
-
-                for miner in miners:
-                    validator_model_params = torch.nn.utils.parameters_to_vector(
-                        validator.model.torch_model.parameters()
-                    )
-                    validator_slice = validator_model_params[validator.slice_indices]
-                    miner.model.update_with_slice(
-                        validator_slice, validator.slice_indices
-                    )
-                    if miner.model.lr_scheduler is not None:
-                        miner.model.lr_scheduler.step()
-
-                if PLOT_INTERACTIVELY and interactive_plotter is not None:
-                    interactive_plotter.plot_data_and_model(
-                        torch_model=validator.model.torch_model,
-                        features=val_dataset.features,
-                        targets=val_dataset.targets,
-                    )
-
-            if PLOT_INTERACTIVELY:
-                # Disable interactive mode when done and keep the final plot displayed
-                plt.ioff()
-                plt.show()
+            TrainingLoop(
+                validator=validator,
+                miners=miners,
+                infinite_train_loader=infinite_train_loader,
+                infinite_val_loader=infinite_val_loader,
+            ).run()
 
             validator_val_losses_compression_factor.update(
                 {f"{same_model_init}/{compression_factor}": validator.model.val_losses}
             )
-
-            # plot_scores(validator.scores)
 
 
 if __name__ == "__main__":

@@ -13,5 +13,4 @@ class TrainingComponents(BaseModel):
     lr_scheduler: torch.optim.lr_scheduler.LRScheduler | None = None
     loss_transformation: Callable[[torch.Tensor, nn.Module], torch.Tensor] | None = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True, "protected_namespaces": ()}
