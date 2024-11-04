@@ -16,7 +16,7 @@ start_ts=$(date +"%Y-%m-%d %H:%M:%S.%N")
 run_num=0
 
 # Loop through all combinations
-for same_model in "--same-model-init" "--no-same-model-init"; do
+for same_model in "--same-model-init"; do
     for compression in 1 10 100 1000; do
         # Create a unique directory for each run based on timestamp, `same_model`, and `compression`
         model_init_status=$( [[ $same_model == "--same-model-init" ]] && echo "True" || echo "False" )
@@ -26,7 +26,7 @@ for same_model in "--same-model-init" "--no-same-model-init"; do
         mkdir -p "$run_dir"
 
         # Start each run with the specified GPU and configuration, log output to the directory
-        be run densenet --num-communication-rounds 234375 --gpu "$run_num" --only-train miners $same_model --compression-factors $compression > "${run_dir}/metrics.log" 2>&1 &
+        be run densenet --num-communication-rounds 23437 --gpu "$run_num" --only-train miners $same_model --model-kwargs '{"norm": "group"}' --compression-factors $compression > "${run_dir}/metrics.log" 2>&1 &
         
         # Save the PID for later tracking
         echo $! > "${PIDS_DIR}/run${run_num}.pid"
