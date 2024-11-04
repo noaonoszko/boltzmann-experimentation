@@ -26,7 +26,7 @@ for same_model in "--same-model-init"; do
         mkdir -p "$run_dir"
 
         # Start each run with the specified GPU and configuration, log output to the directory
-        be run densenet --num-communication-rounds 234375 --gpu "$run_num" --only-train miners $same_model --model-kwargs '{"norm": "group"}' --compression-factors $compression > "${run_dir}/metrics.log" 2>&1 &
+        be run densenet --num-communication-rounds 23437 --gpu "$run_num" --only-train miners $same_model --model-kwargs '{"norm": "group"}' --compression-factors $compression > "${run_dir}/metrics.log" 2>&1 &
         
         # Save the PID for later tracking
         echo $! > "${PIDS_DIR}/run${run_num}.pid"
