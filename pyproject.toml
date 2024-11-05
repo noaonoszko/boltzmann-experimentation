@@ -38,7 +38,56 @@ build-backend = "hatchling.build"
 dev-dependencies = [
     "pre-commit>=4.0.1",
     "pytest>=8.3.3",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
 ]
 
 [project.scripts]
 boltz = "boltz.training.experiment:app"
+
+# ------------------------------------- Testing ----------------------------------------
+
+[tool.pytest.ini_options]
+addopts = [
+  "-ra",
+  "--cov",
+  "--cov-config=pyproject.toml",
+  "--import-mode=importlib",
+  "--color=yes",
+]
+minversion = "7.0"
+norecursedirs = "__pycache__"
+testpaths = [
+  "tests/unit",
+  "tests/integration",
+]
+
+[tool.coverage.run]
+source = [
+  "src",
+]
+omit = [
+  "*/__init__.py",
+  "*/__main__.py",
+  "*/test_*.py",
+]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+exclude_lines = [
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
+
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self.debug",
+
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
+
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if __name__ == .__main__.:",
+]
