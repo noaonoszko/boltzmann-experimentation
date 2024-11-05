@@ -1,4 +1,5 @@
-import cyclopts
+from typing import Annotated
+from cyclopts import App, Group, Parameter, validators
 import torch
 from tqdm import tqdm
 from tqdm.auto import trange
@@ -24,14 +25,21 @@ from boltz.config.settings import general_settings as g, start_ts
 from boltz.training.validator import Validator
 import ast
 
-app = cyclopts.App()
+app = App()
+
+training_duration = Group(
+    "Measure of training duration (choose one)",
+    default_parameter=Parameter(negative=""),  # Disable "--no-" flags
+    validator=validators.LimitedChoice(min=0, max=1),  # Mutually Exclusive Options
+)
 
 
 @app.command
 def run(
     model_type: MODEL_TYPE,
     num_miners: int = 5,
-    num_communication_rounds: int = 3000,
+    num_comrounds: Annotated[int, Parameter(group=training_duration)] = 3000,
+    num_epochs: Annotated[int, Parameter(group=training_duration)] = 300,
     batch_size_train: int = 128,
     batch_size_val: int = 512,
     gpu: GPU | None = None,
@@ -46,11 +54,7 @@ def run(
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
     g.model_kwargs |= parsed_model_kwargs
     g.num_miners = num_miners if num_miners else g.num_miners
-    g.num_communication_rounds = (
-        num_communication_rounds
-        if num_communication_rounds
-        else g.num_communication_rounds
-    )
+    g.num_epochs = num_epochs if num_epochs else g.num_epochs
     g.batch_size_train = batch_size_train
     g.batch_size_val = batch_size_val
     g.set_device(gpu)
@@ -60,9 +64,6 @@ def run(
         [True, False] if same_model_init is None else [same_model_init]
     )
 
-    general_logger.info(
-        f"Starting experiment on device {g.device} with {same_model_init_values=} and {compression_factors=}"
-    )
     # Use TrainingComponentsFactory to create components based on the initialized torch_model
     t = TrainingComponentsFactory.create_components(model_type)
 
@@ -72,6 +73,16 @@ def run(
     train_dataset, val_dataset = DatasetFactory.create_dataset(model_type)
     general_logger.success(
         f"Created train dataset of length {len(train_dataset)} and val dataset of length {len(val_dataset)} for model {model_type}"
+    )
+    if g.num_comrounds is None:
+        g.num_comrounds = int(
+            g.num_epochs * len(train_dataset) / g.batch_size_train / g.num_miners
+        )
+    else:
+        g.num_comrounds = num_comrounds
+    general_logger.info(
+        f"Starting experiment on device {g.device} with {same_model_init_values=} "
+        f"and {compression_factors=} and {g.num_comrounds=}"
     )
 
     # Infinite iterator for training
@@ -93,7 +104,7 @@ def run(
                 )
             val_batch = next(infinite_val_loader)
             model.val_step(val_batch)
-            for _ in trange(g.num_communication_rounds):
+            for _ in trange(g.num_comrounds):
                 batch = next(infinite_train_loader)
                 model.torch_model.train()
                 model.train_step(batch)

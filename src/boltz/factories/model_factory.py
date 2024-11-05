@@ -35,8 +35,8 @@ class ModelFactory:
                 t.lr_scheduler = MultiStepLR(
                     optimizer,
                     milestones=(
-                        int(0.5 * g.num_communication_rounds),
-                        int(0.75 * g.num_communication_rounds),
+                        int(0.5 * g.num_comrounds),
+                        int(0.75 * g.num_comrounds),
                     ),
                     gamma=0.1,
                 )

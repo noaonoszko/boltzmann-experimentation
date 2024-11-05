@@ -20,12 +20,15 @@ class GeneralSettings(BaseSettings):
     arguments or their defaults but in some cases elsewhere.
     """
 
+    # Training
+    num_epochs: int = -1
+
     # Model
     model_kwargs: dict = Field(default_factory=dict)
 
     # Distributed learning
     num_miners: int = -1
-    num_communication_rounds: int = -1
+    num_comrounds: int = -1
     compression_factor: int = 100
     agg_bn_params: bool = True
 
