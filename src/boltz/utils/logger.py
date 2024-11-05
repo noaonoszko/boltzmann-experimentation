@@ -51,7 +51,7 @@ def init_wandb_run(
     )
     for param in g.wandb_legend_params:
         if param in config:
-            run_name += f", {param}={config[param]}"
+            run_name += f", {param}={None if config[param] == '' else config[param]}"
         else:
             general_logger.warning(
                 f"Skipping wandb legend param '{param}' because it doesn't exist in the config that will be logged."
