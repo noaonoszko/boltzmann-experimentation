@@ -25,21 +25,28 @@ class ModelFactory:
                 optimizer = optim.Adam(torch_model.parameters(), lr=t.initial_lr)
             case "densenet":
                 torch_model = models.DenseNet121()
-                optimizer = optim.SGD(
-                    torch_model.parameters(),
-                    lr=t.initial_lr,
-                    momentum=0.9,
-                    weight_decay=1e-4,
-                    nesterov=True,
-                )
-                t.lr_scheduler = MultiStepLR(
-                    optimizer,
-                    milestones=(
-                        int(0.5 * g.num_comrounds),
-                        int(0.75 * g.num_comrounds),
-                    ),
-                    gamma=0.1,
-                )
+                optimizer = None
+                match g.optimizer:
+                    case "adam":
+                        optimizer = optim.Adam(torch_model.parameters(), lr=0.001)
+                    case "sgd":
+                        optimizer = optim.SGD(
+                            torch_model.parameters(),
+                            lr=t.initial_lr,
+                            momentum=0.9,
+                            weight_decay=1e-4,
+                            nesterov=True,
+                        )
+                        t.lr_scheduler = MultiStepLR(
+                            optimizer,
+                            milestones=(
+                                int(0.5 * g.num_comrounds),
+                                int(0.75 * g.num_comrounds),
+                            ),
+                            gamma=0.1,
+                        )
+                    case _:
+                        raise ValueError(f"Unsupported optimizer type: {g.optimizer}")
             case "resnet18":
                 torch_model = torchvision.models.resnet18()
                 torch_model.fc = nn.Linear(torch_model.fc.in_features, 10)

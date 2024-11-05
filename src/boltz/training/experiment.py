@@ -5,7 +5,7 @@ from tqdm import tqdm
 from tqdm.auto import trange
 
 import wandb
-from boltz.config.literals import GPU, ONLY_TRAIN
+from boltz.config.literals import GPU, ONLY_TRAIN, OPTIMIZER
 from boltz.utils.logger import (
     add_file_logger,
     general_logger,
@@ -50,6 +50,7 @@ def run(
     model_kwargs: str | None = None,
     agg_bn_params: bool = True,
     wandb_legend_params: list[str] | None = None,
+    optimizer: OPTIMIZER | None = None,
 ):
     # Change pydantic settings
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
@@ -64,6 +65,7 @@ def run(
     g.wandb_legend_params = (
         wandb_legend_params if wandb_legend_params else g.wandb_legend_params
     )
+    g.optimizer = optimizer if optimizer else g.optimizer
     same_model_init_values = (
         [True, False] if same_model_init is None else [same_model_init]
     )

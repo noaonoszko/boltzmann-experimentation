@@ -25,7 +25,13 @@ class TrainingComponentsFactory:
 
             case "densenet":
                 criterion = nn.CrossEntropyLoss()
-                initial_lr = 0.1
+                match g.optimizer:
+                    case "adam":
+                        initial_lr = 0.001
+                    case "sgd":
+                        initial_lr = 0.1
+                    case _:
+                        raise ValueError(f"Unsupported optimizer type: {g.optimizer}")
                 g.batch_size_train = 128
 
             case "resnet18":

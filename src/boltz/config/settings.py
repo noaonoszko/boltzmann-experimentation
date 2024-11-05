@@ -3,7 +3,7 @@ from pydantic import Field
 from datetime import datetime
 from pathlib import Path
 import torch
-from boltz.config.literals import GPU
+from boltz.config.literals import GPU, OPTIMIZER
 
 
 class PerceptronSettings(BaseSettings):
@@ -22,6 +22,7 @@ class GeneralSettings(BaseSettings):
 
     # Training
     num_epochs: int = -1
+    optimizer: OPTIMIZER = "adam"
 
     # Model
     model_kwargs: dict = Field(default_factory=dict)
