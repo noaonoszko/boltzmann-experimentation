@@ -20,6 +20,9 @@ class GeneralSettings(BaseSettings):
     arguments or their defaults but in some cases elsewhere.
     """
 
+    # Training
+    num_epochs: int = 300
+
     # Model
     model_kwargs: dict = Field(default_factory=dict)
 

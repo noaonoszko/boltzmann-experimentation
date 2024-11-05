@@ -46,11 +46,6 @@ def run(
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
     g.model_kwargs |= parsed_model_kwargs
     g.num_miners = num_miners if num_miners else g.num_miners
-    g.num_communication_rounds = (
-        num_communication_rounds
-        if num_communication_rounds
-        else g.num_communication_rounds
-    )
     g.batch_size_train = batch_size_train
     g.batch_size_val = batch_size_val
     g.set_device(gpu)
@@ -60,9 +55,6 @@ def run(
         [True, False] if same_model_init is None else [same_model_init]
     )
 
-    general_logger.info(
-        f"Starting experiment on device {g.device} with {same_model_init_values=} and {compression_factors=}"
-    )
     # Use TrainingComponentsFactory to create components based on the initialized torch_model
     t = TrainingComponentsFactory.create_components(model_type)
 
@@ -72,6 +64,16 @@ def run(
     train_dataset, val_dataset = DatasetFactory.create_dataset(model_type)
     general_logger.success(
         f"Created train dataset of length {len(train_dataset)} and val dataset of length {len(val_dataset)} for model {model_type}"
+    )
+    if g.num_communication_rounds is None:
+        g.num_communication_rounds = int(
+            g.num_epochs * len(train_dataset) / g.batch_size_train / g.num_miners
+        )
+    else:
+        g.num_communication_rounds = num_communication_rounds
+    general_logger.info(
+        f"Starting experiment on device {g.device} with {same_model_init_values=} "
+        f"and {compression_factors=} and {g.num_communication_rounds=}"
     )
 
     # Infinite iterator for training
