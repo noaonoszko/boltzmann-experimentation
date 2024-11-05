@@ -1,4 +1,5 @@
-import cyclopts
+from typing import Annotated
+from cyclopts import App, Group, Parameter, validators
 import torch
 from tqdm import tqdm
 from tqdm.auto import trange
@@ -24,14 +25,21 @@ from boltz.config.settings import general_settings as g, start_ts
 from boltz.training.validator import Validator
 import ast
 
-app = cyclopts.App()
+app = App()
+
+training_duration = Group(
+    "Measure of training duration (choose one)",
+    default_parameter=Parameter(negative=""),  # Disable "--no-" flags
+    validator=validators.LimitedChoice(min=0, max=1),  # Mutually Exclusive Options
+)
 
 
 @app.command
 def run(
     model_type: MODEL_TYPE,
     num_miners: int = 5,
-    num_communication_rounds: int = 3000,
+    num_communication_rounds: Annotated[int, Parameter(group=training_duration)] = 3000,
+    num_epochs: Annotated[int, Parameter(group=training_duration)] = 300,
     batch_size_train: int = 128,
     batch_size_val: int = 512,
     gpu: GPU | None = None,
@@ -46,6 +54,7 @@ def run(
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
     g.model_kwargs |= parsed_model_kwargs
     g.num_miners = num_miners if num_miners else g.num_miners
+    g.num_epochs = num_epochs if num_epochs else g.num_epochs
     g.batch_size_train = batch_size_train
     g.batch_size_val = batch_size_val
     g.set_device(gpu)

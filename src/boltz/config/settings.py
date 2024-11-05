@@ -21,7 +21,7 @@ class GeneralSettings(BaseSettings):
     """
 
     # Training
-    num_epochs: int = 300
+    num_epochs: int = -1
 
     # Model
     model_kwargs: dict = Field(default_factory=dict)
