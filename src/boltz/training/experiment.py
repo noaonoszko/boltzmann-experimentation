@@ -49,6 +49,7 @@ def run(
     compression_factors: list[int] = [1, 10, 100, 1000],
     model_kwargs: str | None = None,
     agg_bn_params: bool = True,
+    wandb_legend_params: list[str] | None = None,
 ):
     # Change pydantic settings
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
@@ -60,6 +61,9 @@ def run(
     g.set_device(gpu)
     g.log_to_wandb = log_to_wandb
     g.agg_bn_params = agg_bn_params
+    g.wandb_legend_params = (
+        wandb_legend_params if wandb_legend_params else g.wandb_legend_params
+    )
     same_model_init_values = (
         [True, False] if same_model_init is None else [same_model_init]
     )
@@ -98,7 +102,7 @@ def run(
             general_logger.info(f"Model has {model.num_params()/1e6:.0f}M params.")
             if log_to_wandb:
                 wandb.finish()
-                run_name = f"Central training: {'Same Init' if same_model_init else 'Diff Init'}"
+                run_name = "Central"
                 init_wandb_run(
                     run_name=run_name, model_type=model_type, training_components=t
                 )
@@ -180,7 +184,7 @@ def run(
 
             if log_to_wandb:
                 wandb.finish()
-                run_name = f"{'Same Init' if same_model_init else 'Diff Init'}: Compression {compression_factor}"
+                run_name = f"{compression_factor}x"
                 init_wandb_run(
                     run_name=run_name, model_type=model_type, training_components=t
                 )

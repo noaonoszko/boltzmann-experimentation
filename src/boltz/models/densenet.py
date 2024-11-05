@@ -39,7 +39,7 @@ def get_norm_layer(num_features):
             return nn.BatchNorm2d(num_features)
         case "group":
             return nn.GroupNorm(8, num_features)  # Adjust number of groups if needed
-        case None:
+        case None | "":
             return nn.Identity()
         case _:
             raise ValueError(f"Unsupported norm type: {norm_type}")

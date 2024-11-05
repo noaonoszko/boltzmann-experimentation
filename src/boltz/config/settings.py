@@ -58,6 +58,7 @@ class GeneralSettings(BaseSettings):
 
     # Logging
     log_to_wandb: bool = True
+    wandb_legend_params: list[str] = Field(default_factory=list)
 
     model_config = {"protected_namespaces": ("settings_",)}
 

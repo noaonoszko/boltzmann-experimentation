@@ -42,15 +42,25 @@ def init_wandb_run(
     training_components: TrainingComponents,
     start_ts_str: str | None = None,
 ) -> None:
+    config = (
+        {
+            "model_type": model_type,
+        }
+        | g.model_kwargs
+        | training_components.__dict__
+    )
+    for param in g.wandb_legend_params:
+        if param in config:
+            run_name += f", {param}={config[param]}"
+        else:
+            general_logger.warning(
+                f"Skipping wandb legend param '{param}' because it doesn't exist in the config that will be logged."
+            )
+
     wandb.init(
         project="chakana",
         name=run_name,
         group=start_ts_str if start_ts_str is not None else str(start_ts),
-        config={
-            "model_type": model_type,
-            "batch_size": g.batch_size_train,
-        }
-        | g.model_config
-        | training_components.__dict__,
+        config=config,
         resume="allow",
     )
