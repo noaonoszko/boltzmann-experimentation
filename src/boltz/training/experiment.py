@@ -38,7 +38,7 @@ training_duration = Group(
 def run(
     model_type: MODEL_TYPE,
     num_miners: int = 5,
-    num_comrounds: Annotated[int, Parameter(group=training_duration)] = 3000,
+    num_comrounds: Annotated[int | None, Parameter(group=training_duration)] = None,
     num_epochs: Annotated[int, Parameter(group=training_duration)] = 300,
     batch_size_train: int = 128,
     batch_size_val: int = 512,
@@ -78,7 +78,7 @@ def run(
     general_logger.success(
         f"Created train dataset of length {len(train_dataset)} and val dataset of length {len(val_dataset)} for model {model_type}"
     )
-    if g.num_comrounds is None:
+    if num_comrounds is None:
         g.num_comrounds = int(
             g.num_epochs * len(train_dataset) / g.batch_size_train / g.num_miners
         )
