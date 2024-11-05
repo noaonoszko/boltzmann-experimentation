@@ -3,14 +3,14 @@ from timm.data import create_transform
 from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 
-from boltzmann_experimentation.config.literals import MODEL_TYPE
-from boltzmann_experimentation.config.settings import (
+from boltz.config.literals import MODEL_TYPE
+from boltz.config.settings import (
     general_settings as g,
 )
-from boltzmann_experimentation.config.settings import (
+from boltz.config.settings import (
     perceptron_settings,
 )
-from boltzmann_experimentation.data.dataset import LinearRegressionDataset
+from boltz.data.dataset import LinearRegressionDataset
 
 
 class DatasetFactory:

@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-from boltzmann_experimentation.config.literals import MODEL_TYPE
-from boltzmann_experimentation.config.settings import (
+from boltz.config.literals import MODEL_TYPE
+from boltz.config.settings import (
     general_settings as g,
 )
-from boltzmann_experimentation.schemas.training_components import TrainingComponents
+from boltz.schemas.training_components import TrainingComponents
 
 
 class TrainingComponentsFactory:

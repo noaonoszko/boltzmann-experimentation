@@ -4,13 +4,13 @@ import torch.optim as optim
 import torchvision
 from torch.optim.lr_scheduler import MultiStepLR
 
-from boltzmann_experimentation import models
-from boltzmann_experimentation.config.settings import (
+from boltz import models
+from boltz.config.settings import (
     perceptron_settings,
 )
-from boltzmann_experimentation.schemas.training_components import TrainingComponents
-from boltzmann_experimentation.training.model import Model
-from boltzmann_experimentation.config.settings import general_settings as g
+from boltz.schemas.training_components import TrainingComponents
+from boltz.training.model import Model
+from boltz.config.settings import general_settings as g
 
 
 class ModelFactory:

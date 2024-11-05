@@ -3,11 +3,11 @@ from typing import Any
 
 import numpy as np
 import torch
-from boltzmann_experimentation.config.settings import general_settings
-from boltzmann_experimentation.config.settings import general_settings as g
-from boltzmann_experimentation.training.model import Model
-from boltzmann_experimentation.schemas import MinerSlice
-from boltzmann_experimentation.utils.logger import general_logger
+from boltz.config.settings import general_settings
+from boltz.config.settings import general_settings as g
+from boltz.training.model import Model
+from boltz.schemas import MinerSlice
+from boltz.utils.logger import general_logger
 
 
 class Validator:

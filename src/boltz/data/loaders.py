@@ -1,6 +1,6 @@
 import torch
 from typing import Iterator
-from boltzmann_experimentation.config.settings import (
+from boltz.config.settings import (
     general_settings as g,
 )
 from torch.utils.data import DataLoader, Dataset

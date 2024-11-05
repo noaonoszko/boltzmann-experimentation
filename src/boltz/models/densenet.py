@@ -28,8 +28,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from boltzmann_experimentation.config.literals import NORM_TYPE
-from boltzmann_experimentation.config.settings import general_settings as g
+from boltz.config.literals import NORM_TYPE
+from boltz.config.settings import general_settings as g
 
 
 def get_norm_layer(num_features):

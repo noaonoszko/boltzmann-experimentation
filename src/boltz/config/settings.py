@@ -3,7 +3,7 @@ from pydantic import Field
 from datetime import datetime
 from pathlib import Path
 import torch
-from boltzmann_experimentation.config.literals import GPU
+from boltz.config.literals import GPU
 
 
 class PerceptronSettings(BaseSettings):
