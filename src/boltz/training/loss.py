@@ -3,8 +3,8 @@ from copy import deepcopy
 
 import torch
 
-from boltzmann_experimentation.training.validator import Validator
-from boltzmann_experimentation.utils.logger import general_logger
+from boltz.training.validator import Validator
+from boltz.utils.logger import general_logger
 
 
 class LossCalculator(ABC):

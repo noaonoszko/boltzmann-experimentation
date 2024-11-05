@@ -1,5 +1,5 @@
 [project]
-name = "boltzmann-experimentation"
+name = "boltz"
 version = "0.1.0"
 description = "Experiments for the boltzmann project."
 readme = "README.md"
@@ -41,4 +41,4 @@ dev-dependencies = [
 ]
 
 [project.scripts]
-be = "boltzmann_experimentation.training.experiment:app"
+boltz = "boltz.training.experiment:app"

@@ -2,7 +2,7 @@ from typing import Callable
 
 import torch
 import torch.nn as nn
-from boltzmann_experimentation.config.literals import MODEL_TYPE
+from boltz.config.literals import MODEL_TYPE
 from pydantic import BaseModel, Field
 
 

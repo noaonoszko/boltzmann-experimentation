@@ -2,11 +2,11 @@ from loguru import logger
 import sys
 from pathlib import Path
 import wandb
-from boltzmann_experimentation.config.settings import (
+from boltz.config.settings import (
     general_settings as g,
     start_ts,
 )
-from boltzmann_experimentation.schemas.training_components import TrainingComponents
+from boltz.schemas.training_components import TrainingComponents
 
 # Remove the default logger
 logger.remove()

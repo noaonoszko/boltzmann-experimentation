@@ -8,8 +8,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 import wandb
-from boltzmann_experimentation.utils.logger import general_logger, metrics_logger
-from boltzmann_experimentation.config.settings import (
+from boltz.utils.logger import general_logger, metrics_logger
+from boltz.config.settings import (
     general_settings as g,
 )
 

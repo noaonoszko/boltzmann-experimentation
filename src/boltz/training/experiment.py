@@ -4,24 +4,24 @@ from tqdm import tqdm
 from tqdm.auto import trange
 
 import wandb
-from boltzmann_experimentation.config.literals import GPU, ONLY_TRAIN
-from boltzmann_experimentation.utils.logger import (
+from boltz.config.literals import GPU, ONLY_TRAIN
+from boltz.utils.logger import (
     add_file_logger,
     general_logger,
     init_wandb_run,
     metrics_logger,
 )
-from boltzmann_experimentation.training.loss import (
+from boltz.training.loss import (
     ExactLoss,
 )
-from boltzmann_experimentation.training.training_loop import TrainingLoop
-from boltzmann_experimentation.factories import TrainingComponentsFactory
-from boltzmann_experimentation.data.loaders import infinite_data_loader_generator
-from boltzmann_experimentation.training.miner import Miner
-from boltzmann_experimentation.factories import ModelFactory, DatasetFactory
-from boltzmann_experimentation.config.literals import MODEL_TYPE
-from boltzmann_experimentation.config.settings import general_settings as g, start_ts
-from boltzmann_experimentation.training.validator import Validator
+from boltz.training.training_loop import TrainingLoop
+from boltz.factories import TrainingComponentsFactory
+from boltz.data.loaders import infinite_data_loader_generator
+from boltz.training.miner import Miner
+from boltz.factories import ModelFactory, DatasetFactory
+from boltz.config.literals import MODEL_TYPE
+from boltz.config.settings import general_settings as g, start_ts
+from boltz.training.validator import Validator
 import ast
 
 app = cyclopts.App()
