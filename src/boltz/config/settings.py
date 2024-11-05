@@ -28,7 +28,7 @@ class GeneralSettings(BaseSettings):
 
     # Distributed learning
     num_miners: int = -1
-    num_communication_rounds: int = -1
+    num_comrounds: int = -1
     compression_factor: int = 100
     agg_bn_params: bool = True
 

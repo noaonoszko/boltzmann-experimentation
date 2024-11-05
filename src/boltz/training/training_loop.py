@@ -69,7 +69,7 @@ class TrainingLoop:
                 miner.model.lr_scheduler.step()
 
     def run(self):
-        for _ in (t := trange(g.num_communication_rounds)):
+        for _ in (t := trange(g.num_comrounds)):
             self.validator.reset_slices_and_indices()
             for miner in self.miners:
                 self.miner_local_step(miner)
