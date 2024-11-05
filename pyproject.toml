@@ -41,4 +41,4 @@ dev-dependencies = [
 ]
 
 [project.scripts]
-be = "boltz.training.experiment:app"
+boltz = "boltz.training.experiment:app"
