@@ -45,9 +45,8 @@ def init_wandb_run(
     config = (
         {
             "model_type": model_type,
-            "batch_size": g.batch_size_train,
         }
-        | g.model_config
+        | g.model_kwargs
         | training_components.__dict__
     )
     for param in g.wandb_legend_params:
