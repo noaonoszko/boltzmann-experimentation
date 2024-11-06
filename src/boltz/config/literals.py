@@ -11,3 +11,4 @@ MODEL_TYPE = Literal[
     "deit-b",
 ]
 NORM_TYPE = Literal["batch", "group"] | None
+OPTIMIZER = Literal["sgd", "adam"]

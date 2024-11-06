@@ -46,6 +46,7 @@ def init_wandb_run(
         {
             "model_type": model_type,
         }
+        | g.__dict__
         | g.model_kwargs
         | training_components.__dict__
     )
