@@ -36,6 +36,7 @@ training_duration = Group(
 
 @app.command
 def run(
+    wandb_group: str,
     model_type: MODEL_TYPE,
     num_miners: int = 5,
     num_comrounds: Annotated[int | None, Parameter(group=training_duration)] = None,
@@ -108,7 +109,10 @@ def run(
                 wandb.finish()
                 run_name = "Central"
                 init_wandb_run(
-                    run_name=run_name, model_type=model_type, training_components=t
+                    run_name=run_name,
+                    group=wandb_group,
+                    model_type=model_type,
+                    training_components=t,
                 )
             val_batch = next(infinite_val_loader)
             model.val_step(val_batch)
@@ -190,7 +194,10 @@ def run(
                 wandb.finish()
                 run_name = f"{compression_factor}x"
                 init_wandb_run(
-                    run_name=run_name, model_type=model_type, training_components=t
+                    run_name=run_name,
+                    group=wandb_group,
+                    model_type=model_type,
+                    training_components=t,
                 )
 
             # Validate the initial model
