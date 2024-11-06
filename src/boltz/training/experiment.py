@@ -51,6 +51,7 @@ def run(
     agg_bn_params: bool = True,
     wandb_legend_params: list[str] | None = None,
     optimizer: OPTIMIZER | None = None,
+    initial_lr: float | None = None,
 ):
     # Change pydantic settings
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
@@ -66,6 +67,7 @@ def run(
         wandb_legend_params if wandb_legend_params else g.wandb_legend_params
     )
     g.optimizer = optimizer if optimizer else g.optimizer
+    g.initial_lr = initial_lr if initial_lr else g.initial_lr
     same_model_init_values = (
         [True, False] if same_model_init is None else [same_model_init]
     )

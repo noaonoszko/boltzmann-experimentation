@@ -23,6 +23,7 @@ class GeneralSettings(BaseSettings):
     # Training
     num_epochs: int = -1
     optimizer: OPTIMIZER = "adam"
+    initial_lr: float = -1.0
 
     # Model
     model_kwargs: dict = Field(default_factory=dict)
