@@ -36,8 +36,8 @@ training_duration = Group(
 
 @app.command
 def run(
-    wandb_group: str,
     model_type: MODEL_TYPE,
+    wandb_group: str,
     num_miners: int = 5,
     num_comrounds: Annotated[int | None, Parameter(group=training_duration)] = None,
     num_epochs: Annotated[int, Parameter(group=training_duration)] = 300,
@@ -53,6 +53,7 @@ def run(
     wandb_legend_params: list[str] | None = None,
     optimizer: OPTIMIZER | None = None,
     initial_lr: float | None = None,
+    scale_baseline_bs: bool = True,
 ):
     # Change pydantic settings
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
@@ -128,10 +129,12 @@ def run(
 
     # Train baselines
     if only_train in (None, "baselines"):
-        g.batch_size_train *= g.num_miners
+        if scale_baseline_bs:
+            g.batch_size_train *= g.num_miners
         t.initial_lr *= g.num_miners
         train_baselines()
-        g.batch_size_train //= g.num_miners
+        if scale_baseline_bs:
+            g.batch_size_train //= g.num_miners
         t.initial_lr //= g.num_miners
         general_logger.success("Trained baselines")
     if only_train == "baselines":
