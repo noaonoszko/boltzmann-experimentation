@@ -131,10 +131,14 @@ def run(
     if only_train in (None, "baselines"):
         if scale_baseline_bs:
             g.batch_size_train *= g.num_miners
+        else:
+            g.num_comrounds *= g.num_miners
         t.initial_lr *= g.num_miners
         train_baselines()
         if scale_baseline_bs:
             g.batch_size_train //= g.num_miners
+        else:
+            g.num_comrounds //= g.num_miners
         t.initial_lr //= g.num_miners
         general_logger.success("Trained baselines")
     if only_train == "baselines":
