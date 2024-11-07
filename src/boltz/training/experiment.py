@@ -37,6 +37,7 @@ training_duration = Group(
 @app.command
 def run(
     model_type: MODEL_TYPE,
+    wandb_group: str,
     num_miners: int = 5,
     num_comrounds: Annotated[int | None, Parameter(group=training_duration)] = None,
     num_epochs: Annotated[int, Parameter(group=training_duration)] = 300,
@@ -51,6 +52,8 @@ def run(
     agg_bn_params: bool = True,
     wandb_legend_params: list[str] | None = None,
     optimizer: OPTIMIZER | None = None,
+    initial_lr: float | None = None,
+    scale_baseline_bs: bool = True,
 ):
     # Change pydantic settings
     parsed_model_kwargs = ast.literal_eval(model_kwargs) if model_kwargs else {}
@@ -66,6 +69,7 @@ def run(
         wandb_legend_params if wandb_legend_params else g.wandb_legend_params
     )
     g.optimizer = optimizer if optimizer else g.optimizer
+    g.initial_lr = initial_lr if initial_lr else g.initial_lr
     same_model_init_values = (
         [True, False] if same_model_init is None else [same_model_init]
     )
@@ -106,7 +110,10 @@ def run(
                 wandb.finish()
                 run_name = "Central"
                 init_wandb_run(
-                    run_name=run_name, model_type=model_type, training_components=t
+                    run_name=run_name,
+                    group=wandb_group,
+                    model_type=model_type,
+                    training_components=t,
                 )
             val_batch = next(infinite_val_loader)
             model.val_step(val_batch)
@@ -122,10 +129,12 @@ def run(
 
     # Train baselines
     if only_train in (None, "baselines"):
-        g.batch_size_train *= g.num_miners
+        if scale_baseline_bs:
+            g.batch_size_train *= g.num_miners
         t.initial_lr *= g.num_miners
         train_baselines()
-        g.batch_size_train //= g.num_miners
+        if scale_baseline_bs:
+            g.batch_size_train //= g.num_miners
         t.initial_lr //= g.num_miners
         general_logger.success("Trained baselines")
     if only_train == "baselines":
@@ -188,7 +197,10 @@ def run(
                 wandb.finish()
                 run_name = f"{compression_factor}x"
                 init_wandb_run(
-                    run_name=run_name, model_type=model_type, training_components=t
+                    run_name=run_name,
+                    group=wandb_group,
+                    model_type=model_type,
+                    training_components=t,
                 )
 
             # Validate the initial model

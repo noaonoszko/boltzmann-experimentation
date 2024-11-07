@@ -4,7 +4,6 @@ from pathlib import Path
 import wandb
 from boltz.config.settings import (
     general_settings as g,
-    start_ts,
 )
 from boltz.schemas.training_components import TrainingComponents
 
@@ -38,9 +37,9 @@ def add_file_logger(log_dir: Path) -> None:
 def init_wandb_run(
     *,
     run_name: str,
+    group: str,
     model_type: str,
     training_components: TrainingComponents,
-    start_ts_str: str | None = None,
 ) -> None:
     config = (
         {
@@ -61,7 +60,7 @@ def init_wandb_run(
     wandb.init(
         project="chakana",
         name=run_name,
-        group=start_ts_str if start_ts_str is not None else str(start_ts),
+        group=group,
         config=config,
         resume="allow",
     )

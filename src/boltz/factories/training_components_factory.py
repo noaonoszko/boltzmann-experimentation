@@ -27,7 +27,7 @@ class TrainingComponentsFactory:
                 criterion = nn.CrossEntropyLoss()
                 match g.optimizer:
                     case "adam":
-                        initial_lr = 0.001
+                        initial_lr = 0.001 if g.initial_lr is -1.0 else g.initial_lr
                     case "sgd":
                         initial_lr = 0.1
                     case _:
