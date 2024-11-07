@@ -44,7 +44,7 @@ dev-dependencies = [
 
 [project.scripts]
 boltz = "boltz.training.experiment:app"
-wb = "boltz.wandb.cli:app"
+wab = "boltz.wandb.cli:app"
 
 # ------------------------------------- Testing ----------------------------------------
 
