@@ -28,7 +28,9 @@ class ModelFactory:
                 optimizer = None
                 match g.optimizer:
                     case "adam":
-                        optimizer = optim.Adam(torch_model.parameters(), lr=0.001)
+                        optimizer = optim.Adam(
+                            torch_model.parameters(), lr=t.initial_lr
+                        )
                     case "sgd":
                         optimizer = optim.SGD(
                             torch_model.parameters(),
