@@ -1,6 +1,6 @@
 /data
 results/
-wandb/
+/wandb
 pids/
 
 # Byte-compiled / optimized / DLL files
