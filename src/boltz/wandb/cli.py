@@ -1,7 +1,7 @@
 """CLI module for managing and modifying Weights & Biases (W&B) runs."""
 
 from datetime import datetime, timedelta
-from boltz.utils.logger import general_logger as l
+from texp.utils.logger import general_logger as l
 from cyclopts import App
 
 import wandb

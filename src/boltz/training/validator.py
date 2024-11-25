@@ -3,11 +3,11 @@ from typing import Any
 
 import numpy as np
 import torch
-from boltz.config.settings import general_settings
-from boltz.config.settings import general_settings as g
-from boltz.training.model import Model
-from boltz.schemas import MinerSlice
-from boltz.utils.logger import general_logger
+from texp.config.settings import general_settings
+from texp.config.settings import general_settings as g
+from texp.training.model import Model
+from texp.schemas import MinerSlice
+from texp.utils.logger import general_logger
 
 
 class Validator:

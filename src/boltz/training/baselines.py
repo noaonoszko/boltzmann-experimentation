@@ -1,10 +1,10 @@
 from typing import Iterator
 import torch
-from boltz.config.literals import MODEL_TYPE
-from boltz.config.settings import general_settings as g
-from boltz.factories import ModelFactory
-from boltz.schemas.training_components import TrainingComponents
-from boltz.utils.logger import (
+from texp.config.literals import MODEL_TYPE
+from texp.config.settings import general_settings as g
+from texp.factories import ModelFactory
+from texp.schemas.training_components import TrainingComponents
+from texp.utils.logger import (
     general_logger,
     init_wandb_run,
 )

@@ -1,9 +1,9 @@
 import torch
-from boltz.models import DenseNet121
-from boltz.training.validator import Validator
-from boltz.training.loss import ExactLoss
-from boltz.training.model import Model
-from boltz.config.settings import general_settings as g
+from texp.models import DenseNet121
+from texp.training.validator import Validator
+from texp.training.loss import ExactLoss
+from texp.training.model import Model
+from texp.config.settings import general_settings as g
 
 NUM_COMMUNICATED_PARAMETERS = 100
 

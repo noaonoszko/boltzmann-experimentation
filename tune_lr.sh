@@ -43,7 +43,7 @@ for lr_exp in {-7..-1}; do
     mkdir -p "$run_dir"
 
     # Start each run with the specified GPU and configuration, log output to the directory
-    boltz run densenet --gpu "$gpu_id" --wandb-group "$WANDB_GROUP" --only-train baselines --no-same-model-init --wandb-legend-params initial_lr --initial-lr "$initial_lr" > "${run_dir}/metrics.log" 2>&1 &
+    texp run densenet --gpu "$gpu_id" --wandb-group "$WANDB_GROUP" --only-train baselines --no-same-model-init --wandb-legend-params initial_lr --initial-lr "$initial_lr" > "${run_dir}/metrics.log" 2>&1 &
     
     # Save the PID for later tracking
     echo $! > "${PIDS_DIR}/run${run_num}.pid"

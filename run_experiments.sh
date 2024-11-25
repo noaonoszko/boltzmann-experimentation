@@ -32,7 +32,7 @@ for norm in "" "batch" "group"; do
         mkdir -p "$run_dir"
 
         # Start each run with the specified GPU and configuration, log output to the directory
-        boltz run densenet --gpu "$gpu_id" --only-train miners --wandb-legend-params norm --model-kwargs "{\"norm\": \"$norm\"}" --compression-factors $compression > "${run_dir}/metrics.log" 2>&1 &
+        texp run densenet --gpu "$gpu_id" --only-train miners --wandb-legend-params norm --model-kwargs "{\"norm\": \"$norm\"}" --compression-factors $compression > "${run_dir}/metrics.log" 2>&1 &
         
         # Save the PID for later tracking
         echo $! > "${PIDS_DIR}/run${run_num}.pid"
