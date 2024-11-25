@@ -2,10 +2,10 @@ from typing import Annotated
 from cyclopts import App, Group, Parameter, validators
 import torch
 from tqdm import tqdm
-from tqdm.auto import trange
 
 import wandb
 from boltz.config.literals import GPU, ONLY_TRAIN, OPTIMIZER
+from boltz.training.baselines import train_baselines
 from boltz.utils.logger import (
     add_file_logger,
     general_logger,
@@ -100,41 +100,27 @@ def run(
     infinite_val_loader = infinite_data_loader_generator(val_dataset, train=False)
     validator_val_losses_compression_factor = {}
 
-    def train_baselines() -> None:
-        for same_model_init in tqdm(same_model_init_values):
-            if same_model_init:
-                torch.manual_seed(SEED)
-            model = ModelFactory.create_model(t)
-            general_logger.info(f"Model has {model.num_params()/1e6:.0f}M params.")
-            if log_to_wandb:
-                wandb.finish()
-                run_name = "Central"
-                init_wandb_run(
-                    run_name=run_name,
-                    group=wandb_group,
-                    model_type=model_type,
-                    training_components=t,
-                )
-            val_batch = next(infinite_val_loader)
-            model.val_step(val_batch)
-            for _ in trange(g.num_comrounds):
-                batch = next(infinite_train_loader)
-                model.torch_model.train()
-                model.train_step(batch)
-                val_batch = next(infinite_val_loader)
-                model.torch_model.eval()
-                model.val_step(val_batch)
-                if model.lr_scheduler is not None:
-                    model.lr_scheduler.step()
-
     # Train baselines
     if only_train in (None, "baselines"):
         if scale_baseline_bs:
             g.batch_size_train *= g.num_miners
+        else:
+            g.num_comrounds *= g.num_miners
         t.initial_lr *= g.num_miners
-        train_baselines()
+        train_baselines(
+            same_model_init_values=same_model_init_values,
+            SEED=SEED,
+            log_to_wandb=log_to_wandb,
+            t=t,
+            wandb_group=wandb_group,
+            model_type=model_type,
+            infinite_val_loader=infinite_val_loader,
+            infinite_train_loader=infinite_train_loader,
+        )
         if scale_baseline_bs:
             g.batch_size_train //= g.num_miners
+        else:
+            g.num_comrounds //= g.num_miners
         t.initial_lr //= g.num_miners
         general_logger.success("Trained baselines")
     if only_train == "baselines":
