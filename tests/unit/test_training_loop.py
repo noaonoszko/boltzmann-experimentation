@@ -5,12 +5,12 @@ import pytest
 import torch
 import torch.nn as nn
 import torch.testing
-from boltz.config.settings import general_settings as g
-from boltz.training.loss import ExactLoss
-from boltz.training.miner import Miner
-from boltz.training.model import Model
-from boltz.training.training_loop import TrainingLoop
-from boltz.training.validator import Validator
+from texp.config.settings import general_settings as g
+from texp.training.loss import ExactLoss
+from texp.training.miner import Miner
+from texp.training.model import Model
+from texp.training.training_loop import TrainingLoop
+from texp.training.validator import Validator
 
 TrainingLoopFixture = tuple[TrainingLoop, Validator, list[Miner]]
 

@@ -4,25 +4,25 @@ import torch
 from tqdm import tqdm
 
 import wandb
-from boltz.config.literals import GPU, ONLY_TRAIN, OPTIMIZER
-from boltz.training.baselines import train_baselines
-from boltz.utils.logger import (
+from texp.config.literals import GPU, ONLY_TRAIN, OPTIMIZER
+from texp.training.baselines import train_baselines
+from texp.utils.logger import (
     add_file_logger,
     general_logger,
     init_wandb_run,
     metrics_logger,
 )
-from boltz.training.loss import (
+from texp.training.loss import (
     ExactLoss,
 )
-from boltz.training.training_loop import TrainingLoop
-from boltz.factories import TrainingComponentsFactory
-from boltz.data.loaders import infinite_data_loader_generator
-from boltz.training.miner import Miner
-from boltz.factories import ModelFactory, DatasetFactory
-from boltz.config.literals import MODEL_TYPE
-from boltz.config.settings import general_settings as g, start_ts
-from boltz.training.validator import Validator
+from texp.training.training_loop import TrainingLoop
+from texp.factories import TrainingComponentsFactory
+from texp.data.loaders import infinite_data_loader_generator
+from texp.training.miner import Miner
+from texp.factories import ModelFactory, DatasetFactory
+from texp.config.literals import MODEL_TYPE
+from texp.config.settings import general_settings as g, start_ts
+from texp.training.validator import Validator
 import ast
 
 app = App()

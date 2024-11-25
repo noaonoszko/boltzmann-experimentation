@@ -1,7 +1,7 @@
 [project]
-name = "boltz"
+name = "texp"
 version = "0.1.0"
-description = "Experiments for the boltzmann project."
+description = "Experiments for the templar project."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -43,8 +43,8 @@ dev-dependencies = [
 ]
 
 [project.scripts]
-boltz = "boltz.training.experiment:app"
-wab = "boltz.wandb.cli:app"
+texp = "texp.training.experiment:app"
+wab = "texp.wandb.cli:app"
 
 # ------------------------------------- Testing ----------------------------------------
 

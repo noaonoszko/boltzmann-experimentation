@@ -2,10 +2,10 @@ from loguru import logger
 import sys
 from pathlib import Path
 import wandb
-from boltz.config.settings import (
+from texp.config.settings import (
     general_settings as g,
 )
-from boltz.schemas.training_components import TrainingComponents
+from texp.schemas.training_components import TrainingComponents
 
 # Remove the default logger
 logger.remove()

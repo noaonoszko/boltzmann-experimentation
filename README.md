@@ -1,11 +1,11 @@
 Run:
 
 ```
-boltz run MODEL_NAME
+texp run MODEL_NAME
 ```
 
 See options for `MODEL_NAME`:
 
 ```
-boltz run --help
+texp run --help
 ```

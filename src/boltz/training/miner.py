@@ -1,8 +1,8 @@
 import torch
-from boltz.utils.logger import general_logger
+from texp.utils.logger import general_logger
 
-from boltz.training.model import Model
-from boltz.schemas import MinerSlice
+from texp.training.model import Model
+from texp.schemas import MinerSlice
 
 
 class Miner:

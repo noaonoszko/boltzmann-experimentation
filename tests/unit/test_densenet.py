@@ -1,7 +1,7 @@
 import pytest
 import torch.nn as nn
 from unittest.mock import patch
-from boltz.models.densenet import get_norm_layer
+from texp.models.densenet import get_norm_layer
 from typing import Generator
 
 ModelKwargsType = dict[str, str | None]
@@ -12,7 +12,7 @@ num_features = 16
 @pytest.fixture
 def mock_model_kwargs() -> Generator[ModelKwargsType, None, None]:
     with patch(
-        "boltz.config.settings.general_settings.model_kwargs", {}
+        "texp.config.settings.general_settings.model_kwargs", {}
     ) as model_kwargs:
         yield model_kwargs
 

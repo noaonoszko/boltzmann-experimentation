@@ -1,10 +1,10 @@
 from typing import Iterator
 
 import torch
-from boltz.config.settings import general_settings as g
-from boltz.training.miner import Miner
-from boltz.training.validator import Validator
-from boltz.utils.logger import (
+from texp.config.settings import general_settings as g
+from texp.training.miner import Miner
+from texp.training.validator import Validator
+from texp.utils.logger import (
     general_logger,
 )
 from tqdm import trange

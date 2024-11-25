@@ -1,7 +1,7 @@
 import torch
-from boltz.models.densenet import DenseNet121
-from boltz.training.model import Model
-from boltz.config.settings import general_settings as g
+from texp.models.densenet import DenseNet121
+from texp.training.model import Model
+from texp.config.settings import general_settings as g
 import torch.optim as optim
 import torch.nn as nn
 
