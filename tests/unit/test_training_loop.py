@@ -170,19 +170,19 @@ def test_run(setup_training_loop: TrainingLoopFixture):
     """Test the entire training loop runs without errors."""
     training_loop, validator, _ = setup_training_loop
 
-    with patch.object(
-        validator, "reset_slices_and_indices"
-    ) as mock_reset_validator, patch.object(
-        training_loop, "miner_local_step", return_value=None
-    ) as mock_miner_local_step, patch.object(
-        training_loop, "calculate_scores"
-    ) as mock_calculate_scores, patch.object(
-        training_loop,
-        "aggregate_and_validate",
-        return_value=0.85,  # Mock a real float for accuracy
-    ) as mock_aggregate_and_validate, patch.object(
-        training_loop, "update_miners"
-    ) as mock_update_miners:
+    with (
+        patch.object(validator, "reset_slices_and_indices") as mock_reset_validator,
+        patch.object(
+            training_loop, "miner_local_step", return_value=None
+        ) as mock_miner_local_step,
+        patch.object(training_loop, "calculate_scores") as mock_calculate_scores,
+        patch.object(
+            training_loop,
+            "aggregate_and_validate",
+            return_value=0.85,  # Mock a real float for accuracy
+        ) as mock_aggregate_and_validate,
+        patch.object(training_loop, "update_miners") as mock_update_miners,
+    ):
         # Run the training loop
         training_loop.run()
 
